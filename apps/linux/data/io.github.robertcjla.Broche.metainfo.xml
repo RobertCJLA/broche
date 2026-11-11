@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.robertcjla.Broche</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Broche</name>
+  <summary>Your Android phone and your PC, working as one</summary>
+  <summary xml:lang="es">Tu teléfono Android y tu PC, trabajando como uno</summary>
+  <description>
+    <p>Notifications, messages, calls, clipboard, files, photos, screen sharing and the phone's camera between Android and Linux. Local-first, end-to-end encrypted, no account and no cloud.</p>
+    <p>Broche is an independent modified build of NectarLink by Bee (thtbee). It is not an official NectarLink release.</p>
+    <p xml:lang="es">Broche es una versión modificada e independiente de NectarLink, de Bee (thtbee). No es una versión oficial de NectarLink.</p>
+    <p xml:lang="es">Notificaciones, mensajes, llamadas, portapapeles, archivos, fotos, pantalla y cámara del teléfono entre Android y Linux. Local, cifrado de extremo a extremo, sin cuenta y sin nube.</p>
+  </description>
+  <launchable type="desktop-id">io.github.robertcjla.Broche.desktop</launchable>
+  <developer id="io.github.robertcjla">
+    <name>RobertCJLA</name>
+  </developer>
+  <url type="homepage">https://github.com/RobertCJLA/broche</url>
+  <url type="bugtracker">https://github.com/RobertCJLA/broche/issues</url>
+  <url type="vcs-browser">https://github.com/RobertCJLA/broche</url>
+  <content_rating type="oars-1.1"/>
+  <provides><binary>broche</binary></provides>
+  <categories><category>Network</category><category>Utility</category></categories>
+  <supports><control>pointing</control><control>keyboard</control></supports>
+  <releases><release version="0.2.0" date="2026-11-11"/></releases>
+</component>

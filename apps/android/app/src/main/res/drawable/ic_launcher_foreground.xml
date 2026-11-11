@@ -1,0 +1,7 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Broche: two interlocked hooks, the same art as docs/branding/broche.svg. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="192" android:viewportHeight="192">
+<group android:translateX="32" android:translateY="32" android:pivotX="64" android:pivotY="64" android:rotation="-45">
+<path android:pathData="M31,30V74A22,22 0,0 0,75,74V46" android:fillColor="@android:color/transparent" android:strokeColor="#5b8def" android:strokeWidth="13" android:strokeLineCap="round" android:strokeLineJoin="round"/>
+<path android:pathData="M97,98V54A22,22 0,0 0,53,54V82" android:fillColor="@android:color/transparent" android:strokeColor="#9fe3ff" android:strokeWidth="13" android:strokeLineCap="round" android:strokeLineJoin="round"/>
+</group></vector>

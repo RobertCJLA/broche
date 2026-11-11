@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- The Broche mark for notifications: flat white, inside the 20dp live area. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="128" android:viewportHeight="128">
+    <group android:pivotX="64" android:pivotY="64" android:rotation="-45">
+        <path android:pathData="M31,30V74A22,22 0,0 0,75,74V46"
+            android:strokeColor="#FFFFFFFF" android:strokeWidth="14" android:strokeLineCap="round"
+            android:strokeLineJoin="round" android:fillColor="#00000000" />
+        <path android:pathData="M97,98V54A22,22 0,0 0,53,54V82"
+            android:strokeColor="#FFFFFFFF" android:strokeWidth="14" android:strokeLineCap="round"
+            android:strokeLineJoin="round" android:fillColor="#00000000" />
+    </group>
+</vector>

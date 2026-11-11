@@ -1,0 +1,2105 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+package io.github.robertcjla.broche.core
+
+import android.content.Context
+import android.content.pm.PackageManager
+import android.net.wifi.WifiManager
+import android.os.Build
+import android.service.notification.NotificationListenerService
+import android.util.Log
+import android.net.Uri
+import io.github.robertcjla.broche.BuildConfig
+import io.github.robertcjla.broche.audio.PcSpeakerPlayer
+import io.github.robertcjla.broche.clipboard.PhoneClipboard
+import io.github.robertcjla.broche.links.LinkNotifications
+import io.github.robertcjla.broche.media.PcMedia
+import io.github.robertcjla.broche.media.PhoneMedia
+import io.github.robertcjla.broche.files.PendingFiles
+import io.github.robertcjla.broche.files.OutgoingFiles
+import io.github.robertcjla.broche.files.ReceivedFiles
+import io.github.robertcjla.broche.files.TransferNotifications
+import io.github.robertcjla.broche.R
+import io.github.robertcjla.broche.notifications.NotificationListener
+import io.github.robertcjla.broche.notifications.PcNotificationPoster
+import io.github.robertcjla.broche.calls.CallCompanion
+import io.github.robertcjla.broche.calls.PhoneCalls
+import io.github.robertcjla.broche.contacts.PhoneContacts
+import io.github.robertcjla.broche.elevated.Elevated
+import io.github.robertcjla.broche.mirror.AppWindows
+import io.github.robertcjla.broche.mirror.InputService
+import io.github.robertcjla.broche.mirror.MirrorRequests
+import io.github.robertcjla.broche.photos.RecentPhotos
+import io.github.robertcjla.broche.service.ConnectionService
+import io.github.robertcjla.broche.sms.PhoneSms
+import io.github.robertcjla.broche.storage.PhoneStorage
+import io.github.robertcjla.broche.toggles.PhoneToggles
+import io.github.robertcjla.broche.webcam.WebcamRequests
+import io.github.robertcjla.broche.webcam.WebcamService
+import io.github.robertcjla.broche.ffi.Event
+import io.github.robertcjla.broche.ffi.EventListener
+import io.github.robertcjla.broche.ffi.FileToSend
+import io.github.robertcjla.broche.ffi.MirrorStream
+import io.github.robertcjla.broche.ffi.Link
+import io.github.robertcjla.broche.ffi.BrocheException
+import io.github.robertcjla.broche.ffi.BrocheNode
+import io.github.robertcjla.broche.ffi.NodeOptions
+import io.github.robertcjla.broche.ffi.Notification
+import io.github.robertcjla.broche.ffi.PairingFailure
+import io.github.robertcjla.broche.ffi.PowerLevel
+import io.github.robertcjla.broche.ffi.RemoteStorageEntry
+import io.github.robertcjla.broche.ffi.TimelineEntry
+import io.github.robertcjla.broche.ffi.TimelineKind
+import io.github.robertcjla.broche.ffi.TimelinePage
+import io.github.robertcjla.broche.ffi.Transfer
+import io.github.robertcjla.broche.ffi.TransferDirection
+import io.github.robertcjla.broche.ffi.TransferStatus
+import io.github.robertcjla.broche.ffi.initLogging
+import io.github.robertcjla.broche.files.transferTitle
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+/**
+ * The app's single connection to `broche-core`. Owns the node, folds
+ * its events into [state], feeds it the phone's battery and network
+ * changes, and runs commands for the UI.
+ */
+@androidx.compose.runtime.Stable
+class Core(context: Context, private val scope: CoroutineScope) : EventListener {
+    private val context = context.applicationContext.also { PhoneClipboard.init(it) }
+    private val ringer = Ringer(this.context)
+    private val pcNotificationPoster = PcNotificationPoster(this.context)
+    private val pcSpeakerPlayer = PcSpeakerPlayer()
+    /** What plays on this phone, for PCs (needs notification access). */
+    private val phoneMedia = PhoneMedia(this.context) { players ->
+        syncActiveMediaColor()
+        notificationOps.trySend { it.mediaChanged(players) }
+    }
+    private val platform = PhonePlatform(
+        this.context,
+        ringer,
+        phoneMedia,
+        onLink = { pc, url -> LinkNotifications.show(this.context, _state.value.nameOf(pc).orEmpty(), url) },
+        onTask = { pc, task ->
+            io.github.robertcjla.broche.notifications.TaskNotifications.show(
+                this.context,
+                pc,
+                _state.value.nameOf(pc).orEmpty(),
+                task,
+            )
+        },
+        calls = { calls },
+        contacts = { contacts },
+        sms = { sms },
+        toggles = { toggles },
+        storage = { storage },
+        onMirror = { pc, request ->
+            MirrorRequests.show(this.context, request, _state.value.nameOf(pc).orEmpty())
+        },
+        onWebcam = { pc, request ->
+            val session = WebcamService.session.value
+            if (session.active && session.pcId == pc && WebcamService.hasPermission(this.context)) {
+                WebcamService.start(this.context, pc, request.height, request.fps, request.camera)
+                true
+            } else {
+                _state.update { it.copy(webcamRequest = request) }
+                WebcamRequests.show(this.context, request, _state.value.nameOf(pc).orEmpty())
+                true
+            }
+        },
+        appWindows = AppWindows(this.context, scope, open = { pc -> mirrorOpen(pc) }, nameOf = { pc -> _state.value.nameOf(pc).orEmpty() }),
+        nameOf = { pc -> _state.value.nameOf(pc).orEmpty() },
+        onKeyboardFromPc = { pc, on -> setKeyboardFromPc(pc, on) },
+    )
+    private val storage = PhoneStorage(this.context) { path ->
+        notificationOps.trySend { it.storageChanged(path) }
+    }
+    private val toggles = PhoneToggles(
+        this.context,
+        onChanged = { state ->
+            notificationOps.trySend { node ->
+                runCatching { node.togglesChanged(state) }.onFailure { Log.i(TAG, "toggles weren't reported", it) }
+            }
+        },
+        onCapabilitiesChanged = { refreshNotificationAccess() },
+    )
+    private val sms = PhoneSms(this.context) {
+        notificationOps.trySend { it.smsChanged(null) }
+    }
+    private val calls = PhoneCalls(
+        this.context,
+        onChange = { call ->
+            notificationOps.trySend { node ->
+                runCatching { node.callChanged(call) }.onFailure { Log.i(TAG, "a call wasn't reported", it) }
+            }
+        },
+        onLogChanged = {
+            notificationOps.trySend { it.callLogChanged() }
+        },
+    )
+    private val contacts = PhoneContacts(this.context) {
+        notificationOps.trySend { it.contactsChanged() }
+    }
+    private val photos = RecentPhotos(
+        this.context,
+        onPhoto = { photo ->
+            notificationOps.trySend { node ->
+                runCatching { node.photoTaken(photo) }.onFailure { Log.i(TAG, "a new photo wasn't announced", it) }
+            }
+        },
+        onChanged = {
+            notificationOps.trySend { it.photosChanged() }
+        },
+    )
+
+    /** What plays on the PCs, in Android's media controls. */
+    val pcMedia = PcMedia(
+        context = this.context,
+        onSeedColorChanged = { syncActiveMediaColor() },
+    ) { pc, player, action, position ->
+        command { it.mediaCommand(pc, player, action, position) }
+    }
+
+    private fun syncActiveMediaColor() {
+        val nextColor = phoneMedia.activeSeedColor ?: pcMedia.activeSeedColor
+        if (_state.value.activeMediaColor != nextColor) {
+            _state.update { if (it.activeMediaColor != nextColor) it.copy(activeMediaColor = nextColor) else it }
+        }
+        accent.updateMediaColor(nextColor)
+    }
+    /**
+     * Notification changes, in order: a removal must never overtake the post
+     * it removes. Runs once the node is up.
+     */
+    private val notificationOps = Channel<suspend (BrocheNode) -> Unit>(Channel.UNLIMITED)
+
+    /**
+     * Remote input for PCs, sent one after another: a button's release must
+     * never overtake its press (or the PC's button would stay down), nor a
+     * laser update its "off".
+     */
+    private val remoteOps = Channel<suspend (BrocheNode) -> Unit>(Channel.UNLIMITED)
+    private val _state = MutableStateFlow(CoreState())
+    private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 8)
+    private val _queuedNotices = MutableSharedFlow<OfflineQueuedNotice>(extraBufferCapacity = 8)
+    private val _clipSuggestions = MutableSharedFlow<ClipSuggestionNotice>(extraBufferCapacity = 4)
+    private var node: BrocheNode? = null
+    private var startJob: Job? = null
+    private var networkChange: Job? = null
+    private val wakeTimers = java.util.concurrent.ConcurrentHashMap<String, Job>()
+
+    @Volatile private var lastBattery: io.github.robertcjla.broche.ffi.Battery? = null
+    @Volatile private var lastSignal: SignalSnapshot = SignalSnapshot()
+    @Volatile private var lastReportedBattery: io.github.robertcjla.broche.ffi.Battery? = null
+
+    private fun pushBatteryAndSignal() {
+        val base = lastBattery ?: return
+        val sig = lastSignal
+        val merged = base.copy(
+            cellBars = sig.cellBars,
+            cellType = sig.cellType,
+            wifiBars = sig.wifiBars,
+        )
+        if (merged != lastReportedBattery) {
+            lastReportedBattery = merged
+            node?.let { scope.launch { it.updateBattery(merged) } }
+        }
+    }
+
+    private val battery = BatteryMonitor(this.context) { battery ->
+        lastBattery = battery
+        pushBatteryAndSignal()
+    }
+    private val signal = SignalMonitor(this.context) { snapshot ->
+        val hadWifi = lastSignal.wifiBars != null
+        val hasWifi = snapshot.wifiBars != null
+        lastSignal = snapshot
+        pushBatteryAndSignal()
+        if (hadWifi != hasWifi && (hasWifi || _state.value.awayMode)) {
+            node?.let { scope.launch { runCatching { it.networkChanged() } } }
+        }
+    }
+    private val accent = AccentMonitor(this.context) { seed ->
+        node?.let { scope.launch { runCatching { it.updateAccent(seed) } } }
+    }
+    private val network = NetworkMonitor(this.context) {
+        // Network callbacks come in bursts; tell the core once they settle.
+        networkChange?.cancel()
+        networkChange = scope.launch {
+            delay(150)
+            if (lastSignal.wifiBars != null || _state.value.awayMode) {
+                node?.networkChanged()
+            }
+            // A new Wi-Fi network turns wireless debugging off; Elevated turns it back on.
+            if (!Elevated.running && lastSignal.wifiBars != null) Elevated.onNetworkChanged()
+        }
+    }
+
+    // Android drops multicast (local discovery) unless a lock is held. The
+    // connection service holds one while paired; this one covers pairing.
+    private val pairingMulticast: WifiManager.MulticastLock? by lazy {
+        this.context.getSystemService(WifiManager::class.java)
+            ?.createMulticastLock("broche-pairing")
+            ?.apply { setReferenceCounted(false) }
+    }
+
+    // Holds a multicast lock while LocalSend LAN interop (UDP 224.0.0.167:53317) is enabled.
+    private val localsendMulticast: WifiManager.MulticastLock? by lazy {
+        this.context.getSystemService(WifiManager::class.java)
+            ?.createMulticastLock("broche-localsend")
+            ?.apply { setReferenceCounted(false) }
+    }
+
+    val state: StateFlow<CoreState> = _state.asStateFlow()
+
+    /** Short messages for the user (a command failed). */
+    val messages: SharedFlow<String> = _messages.asSharedFlow()
+
+    /** Undoable notices emitted when an outbound action is queued for an offline PC. */
+    val queuedNotices: SharedFlow<OfflineQueuedNotice> = _queuedNotices.asSharedFlow()
+
+    /** Context action suggestions for newly received clipboard text. */
+    val clipSuggestions: SharedFlow<ClipSuggestionNotice> = _clipSuggestions.asSharedFlow()
+
+    data class OfflineQueuedNotice(
+        val message: String,
+        val queueId: String?,
+        val peerId: String?,
+    )
+
+    data class ClipSuggestionNotice(
+        val message: String,
+        val actionLabel: String,
+        val suggestion: io.github.robertcjla.broche.ffi.ClipSuggestion,
+    )
+
+    data class PcMirrorConfigState(
+        val pcId: String,
+        val codec: String,
+        val width: Int,
+        val height: Int,
+    )
+
+    data class PcMirrorPacket(
+        val pcId: String,
+        val keyframe: Boolean,
+        val timeUs: Long,
+        val data: ByteArray,
+    )
+
+    private val _pcMirrorConfig = MutableStateFlow<PcMirrorConfigState?>(null)
+    val pcMirrorConfig: StateFlow<PcMirrorConfigState?> = _pcMirrorConfig.asStateFlow()
+
+    @Volatile private var lastPcMirrorKeyframe: PcMirrorPacket? = null
+
+    fun latestPcMirrorKeyframe(pcId: String): PcMirrorPacket? =
+        lastPcMirrorKeyframe?.takeIf { it.pcId == pcId }
+
+    private val _pcMirrorPackets = MutableSharedFlow<PcMirrorPacket>(
+        extraBufferCapacity = 32,
+        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
+    )
+    val pcMirrorPackets: SharedFlow<PcMirrorPacket> = _pcMirrorPackets.asSharedFlow()
+
+    /**
+     * Starts the node (once). Safe to call repeatedly, from any thread: the
+     * app calls it twice as it opens, and two calls at once used to start
+     * two nodes with one identity, which kept taking the PC from each other.
+     */
+    @Synchronized
+    fun start() {
+        if (startJob != null) return
+        startJob = scope.launch(Dispatchers.IO) {
+            initLogging(if (BuildConfig.DEBUG) "debug,iroh=info,swarm_discovery=error" else "info,iroh=warn,swarm_discovery=error")
+            val initialAwayMode = io.github.robertcjla.broche.ui.Preferences.isAwayModeEnabled(context)
+            // The data of before 0.2.0: unreadable now, and "Clear history" can't reach it.
+            context.noBackupFilesDir.resolve("core").deleteRecursively()
+            val options = NodeOptions(
+                // Not "core": builds before 0.2.0 sealed the identity there with another
+                // Keystore key, which this one can't open; a new folder starts a new device.
+                dataDir = context.noBackupFilesDir.resolve("broche").absolutePath,
+                device = deviceInfo(context),
+                appVersion = BuildConfig.VERSION_NAME,
+                power = PowerLevel.BASIC,
+                awayMode = initialAwayMode,
+                downloadsDir = context.cacheDir.resolve("received").absolutePath,
+                usbPort = 53319u.toUShort(),
+                videoHigh = io.github.robertcjla.broche.video.VideoPreferences.high(context),
+                videoAt = io.github.robertcjla.broche.video.VideoPreferences.chosenAt(context),
+            )
+            val started = try {
+                BrocheNode.start(options, platform, KeystoreKeyProtector(), this@Core)
+            } catch (e: BrocheException) {
+                Log.e(TAG, "core failed to start", e)
+                _state.update { it.copy(status = CoreStatus.Failed(e.message ?: e.javaClass.simpleName)) }
+                return@launch
+            }
+            node = started
+            val devices = runCatching { started.pairedDevices() }.getOrDefault(emptyList())
+            val storageAllowed = devices.mapNotNull { dev ->
+                val toggles = runCatching { started.deviceToggles(dev.id) }.getOrDefault(emptyList())
+                if (toggles.any { it.name == PhoneStorage.TOGGLE_NAME && it.enabled }) dev.id else null
+            }.toSet()
+            val clipHistEnabled = runCatching { started.clipboardHistoryEnabled() }.getOrDefault(true)
+            val clipHist = if (clipHistEnabled) {
+                runCatching { started.clipboardHistory(null) }.getOrDefault(emptyList())
+            } else {
+                emptyList()
+            }
+            val retention = runCatching { started.timelineRetention() }.getOrNull()
+            val tlPage = runCatching { started.timelinePage(null, null, null, 0u, 100u) }.getOrNull()
+            val lsEnabled = runCatching { started.localsendEnabled() }.getOrDefault(false)
+            val lsPeers = if (lsEnabled) {
+                runCatching { started.localsendPeers() }.getOrDefault(emptyList())
+            } else {
+                emptyList()
+            }
+            val initialQueue = runCatching { started.sendQueue(null).map { it.toUi() } }.getOrDefault(emptyList())
+            localsendMulticast?.runCatching { if (lsEnabled) acquire() else release() }
+            pruneOldTempCaches()
+            _state.update {
+                it.withDevices(devices, storageAllowed).copy(
+                    status = CoreStatus.Ready(started.deviceId()),
+                    sendQueue = initialQueue,
+                    clipboardHistoryEnabled = clipHistEnabled,
+                    clipboardHistory = clipHist,
+                    timeline = tlPage?.items ?: emptyList(),
+                    timelineTotal = tlPage?.total ?: 0u,
+                    timelineHasMore = tlPage?.hasMore ?: false,
+                    timelineRetentionDays = retention?.maxDays ?: 90u,
+                    localsendEnabled = lsEnabled,
+                    awayMode = initialAwayMode,
+                    localsendPeers = lsPeers,
+                    phoneName = phoneName(context),
+                )
+            }
+            refreshDataRetention()
+            io.github.robertcjla.broche.clipboard.DirectShareTargets.sync(context, _state.value.devices)
+            io.github.robertcjla.broche.widget.PcWidgetProvider.refreshAll(context, _state.value)
+            scope.launch(Dispatchers.IO) {
+                _state
+                    .map { s ->
+                        s.widgetRefreshKey()
+                    }
+                    .distinctUntilChanged()
+                    .collect {
+                        val s = _state.value
+                        io.github.robertcjla.broche.clipboard.DirectShareTargets.sync(context, s.devices)
+                        io.github.robertcjla.broche.widget.PcWidgetProvider.refreshAll(context, s)
+                    }
+            }
+            scope.launch(Dispatchers.IO) {
+                var first = true
+                _state
+                    .map { s ->
+                        s.devices.map { d -> listOf(d.id, d.online, d.deckState?.volume, d.deckState?.muted) }
+                    }
+                    .distinctUntilChanged()
+                    .collect {
+                        if (!first) delay(120L)
+                        first = false
+                        io.github.robertcjla.broche.widget.PcWidgetProvider.refreshAll(context, _state.value)
+                    }
+            }
+            if (devices.isNotEmpty()) ConnectionService.start(context)
+            val initialInputEnabled = InputService.running || InputService.enabled(context)
+            val initialElevated = Elevated.running
+            val initialInputAccess = InputService.running || initialElevated || initialInputEnabled
+            _state.update {
+                it.copy(
+                    photoAccess = RecentPhotos.hasAccess(context),
+                    photoPartialAccess = RecentPhotos.hasPartialAccess(context),
+                    callAccess = PhoneCalls.hasAll(context),
+                    contactsAccess = PhoneContacts.canRead(context),
+                    smsAccess = PhoneSms.hasAll(context),
+                    inputAccess = initialInputAccess,
+                    elevated = initialElevated,
+                    dndAccess = PhoneToggles.hasDndAccess(context),
+                    storageAllFilesAccess = PhoneStorage.hasAllFilesAccess(context),
+                    storageSafFolders = PhoneStorage.safFolders(context).map { f -> f.name },
+                )
+            }
+            started.updatePower(powerLevel(), capabilities(NotificationListener.hasAccess(context)))
+            // Elevated, when set up and wireless debugging is on.
+            scope.launch { Elevated.start() }
+            scope.launch(Dispatchers.Main) {
+                // Allow first Compose frame to draw before registering BroadcastReceivers and ContentObservers on Main.
+                delay(48L)
+                battery.start()
+                accent.start()
+                network.start()
+                if (PhoneCalls.canFollow(context) || PhoneCalls.canReadLog(context)) calls.start()
+                if (PhoneContacts.canRead(context)) contacts.start()
+                if (PhoneSms.canRead(context)) sms.start()
+                _state
+                    .map { s -> s.devices.any { it.online } to s.photoAccess }
+                    .distinctUntilChanged()
+                    .collect { (anyOnline, hasPhotoAccess) ->
+                        if (anyOnline) {
+                            signal.start()
+                            toggles.start()
+                            if (hasPhotoAccess) photos.start() else photos.stop()
+                        } else {
+                            signal.stop()
+                            toggles.stop()
+                            photos.stop()
+                        }
+                    }
+            }
+            scope.launch {
+                for (op in notificationOps) {
+                    runCatching { op(started) }.onFailure { Log.w(TAG, "notification update failed", it) }
+                }
+            }
+            scope.launch {
+                for (op in remoteOps) {
+                    runCatching { op(started) }.onFailure { Log.w(TAG, "remote input failed", it) }
+                }
+            }
+        }
+    }
+
+    // ---- Notifications (from NotificationListener) ----
+
+    /**
+     * The notification listener connected (with what's showing now) or lost
+     * access. What this phone offers PCs follows.
+     */
+    fun notificationAccessChanged(granted: Boolean, showing: List<Notification>) {
+        _state.update { it.copy(notificationAccess = granted) }
+        if (granted && _state.value.devices.isNotEmpty()) ConnectionService.start(context)
+        scope.launch(Dispatchers.Main) { if (granted) phoneMedia.start() else phoneMedia.stop() }
+        notificationOps.trySend { node ->
+            node.updatePower(powerLevel(), capabilities(granted))
+            node.notificationsReset(showing)
+        }
+    }
+
+    fun notificationPosted(notification: Notification) {
+        notificationOps.trySend { it.notificationPosted(notification) }
+    }
+
+    fun notificationRemoved(key: String) {
+        notificationOps.trySend { it.notificationRemoved(key) }
+    }
+
+    fun notificationsRefreshed(showing: List<Notification>) {
+        notificationOps.trySend { it.notificationsReset(showing) }
+    }
+
+    @Volatile private var lastSensitiveAccess = false
+    private val refreshAccessRunning = java.util.concurrent.atomic.AtomicBoolean(false)
+    private val refreshAccessPending = java.util.concurrent.atomic.AtomicBoolean(false)
+    private val lastTransferUiEmitMs = java.util.concurrent.ConcurrentHashMap<String, Long>()
+
+    /**
+     * Re-checks notification access and background restrictions (the user
+     * may have changed them in Settings) and asks Android to reconnect the listener if it's allowed
+     * but not running. Coalesces rapid concurrent calls into at most one follow-up pass.
+     */
+    fun refreshNotificationAccess() {
+        refreshAccessPending.set(true)
+        if (!refreshAccessRunning.compareAndSet(false, true)) return
+        scope.launch(Dispatchers.IO) {
+            try {
+                while (refreshAccessPending.compareAndSet(true, false)) {
+                    val granted = NotificationListener.hasAccess(context)
+                    val sensitive = granted && NotificationListener.canReadSensitive(context)
+                    val becameSensitive = sensitive && !lastSensitiveAccess
+                    lastSensitiveAccess = sensitive
+                    val unrestricted = BackgroundAccess.isUnrestricted(context)
+                    val photoAccess = RecentPhotos.hasAccess(context)
+                    val photoPartialAccess = RecentPhotos.hasPartialAccess(context)
+                    val callAccess = PhoneCalls.hasAll(context)
+                    val contactsAccess = PhoneContacts.canRead(context)
+                    val smsAccess = PhoneSms.hasAll(context)
+                    val inputEnabled = InputService.enabled(context)
+                    val elevated = Elevated.running
+                    val inputAccess = InputService.running || elevated || inputEnabled
+                    val dndAccess = PhoneToggles.hasDndAccess(context)
+                    val storageAllFilesAccess = PhoneStorage.hasAllFilesAccess(context)
+                    val storageSafFolders = PhoneStorage.safFolders(context).map { it.name }
+                    if (!storageAllFilesAccess) storage.stopWatching()
+                    val localNetwork = LocalNetwork.granted(context)
+                    if (localNetwork && !_state.value.localNetwork) {
+                        // Just allowed: reach the PCs now rather than at the next retry.
+                        scope.launch { node?.networkChanged() }
+                    }
+                    val prevPhotos = _state.value.photoAccess
+                    val currentNode = node
+                    val storageAllowed = if (currentNode != null) {
+                        _state.value.devices.mapNotNull { dev ->
+                            val devToggles = runCatching { currentNode.deviceToggles(dev.id) }.getOrDefault(emptyList())
+                            if (devToggles.any { it.name == PhoneStorage.TOGGLE_NAME && it.enabled }) dev.id else null
+                        }.toSet()
+                    } else {
+                        emptySet()
+                    }
+                    _state.update {
+                        it.copy(
+                            notificationAccess = granted,
+                            backgroundUnrestricted = unrestricted,
+                            photoAccess = photoAccess,
+                            photoPartialAccess = photoPartialAccess,
+                            callAccess = callAccess,
+                            contactsAccess = contactsAccess,
+                            smsAccess = smsAccess,
+                            inputAccess = inputAccess,
+                            elevated = elevated,
+                            remoteInputRequested = if (inputAccess) false else it.remoteInputRequested,
+                            dndAccess = dndAccess,
+                            storageAllFilesAccess = storageAllFilesAccess,
+                            storageSafFolders = storageSafFolders,
+                            localNetwork = localNetwork,
+                            devices = if (currentNode != null) {
+                                it.devices.map { d -> d.copy(storageEnabled = d.id in storageAllowed) }
+                            } else {
+                                it.devices
+                            },
+                        )
+                    }
+                    if (granted && NotificationListener.instance == null) {
+                        NotificationListenerService.requestRebind(NotificationListener.component(context))
+                    } else if (becameSensitive) {
+                        NotificationListener.instance?.refreshActive()
+                    }
+                    if (node != null) {
+                        scope.launch(Dispatchers.Main) {
+                            if (_state.value.devices.any { it.online }) toggles.start() else toggles.stop()
+                            if (photoAccess) photos.start() else photos.stop()
+                            if (PhoneCalls.canFollow(context) || PhoneCalls.canReadLog(context)) calls.start() else calls.stop()
+                            if (contactsAccess) contacts.start() else contacts.stop()
+                            if (PhoneSms.canRead(context)) sms.start() else sms.stop()
+                        }
+                        notificationOps.trySend {
+                            it.updatePower(powerLevel(), capabilities(_state.value.notificationAccess))
+                            if (photoAccess && (!prevPhotos || photoPartialAccess)) it.photosChanged()
+                        }
+                    }
+                }
+            } finally {
+                refreshAccessRunning.set(false)
+                if (refreshAccessPending.get()) {
+                    refreshNotificationAccess()
+                }
+            }
+        }
+    }
+
+    override fun onEvent(event: Event) {
+        if (event is Event.Transfer) {
+            val transfer = event.transfer
+            val isRunningProgress = transfer.status is TransferStatus.Running &&
+                transfer.done > 0uL &&
+                (transfer.total == 0uL || transfer.done < transfer.total)
+            if (isRunningProgress) {
+                val now = android.os.SystemClock.elapsedRealtime()
+                val prev = lastTransferUiEmitMs[transfer.id] ?: 0L
+                val wasRunning = _state.value.transfers.firstOrNull { it.id == transfer.id }?.status is TransferStatus.Running
+                if (wasRunning && now - prev < 100L) {
+                    return
+                }
+                lastTransferUiEmitMs[transfer.id] = now
+            } else {
+                lastTransferUiEmitMs.remove(transfer.id)
+            }
+        }
+        if (event.affectsCoreState()) {
+            _state.update { it.reduce(event) }
+        }
+        when (event) {
+            is Event.Transfer -> onTransfer(event.transfer)
+            // The PC stopped ringing on its own (its user pressed Stop): drop "Stop ringing".
+            is Event.Ring -> if (!event.on) {
+                scope.launch(Dispatchers.Main) {
+                    io.github.robertcjla.broche.ui.home.ringingPcs.remove(event.id)
+                }
+            }
+            is Event.MediaChanged -> {
+                val pcName = _state.value.nameOf(event.id).orEmpty()
+                scope.launch(Dispatchers.Default) {
+                    pcMedia.update(event.id, pcName, event.players)
+                }
+            }
+            is Event.NotificationPosted -> scope.launch(Dispatchers.Default) {
+                pcNotificationPoster.post(event.id, event.notification)
+            }
+            is Event.NotificationRemoved -> scope.launch(Dispatchers.Default) {
+                pcNotificationPoster.cancel(event.id, event.key)
+            }
+            is Event.NotificationsReset -> scope.launch(Dispatchers.Default) {
+                pcNotificationPoster.reset(event.id, event.items)
+            }
+            is Event.PcAudioFrame -> pcSpeakerPlayer.playFrame(
+                event.sampleRate.toInt(),
+                event.channels.toInt(),
+                event.pcm,
+            )
+            is Event.PcMirrorConfig -> {
+                _pcMirrorConfig.value = PcMirrorConfigState(
+                    pcId = event.id,
+                    codec = event.codec,
+                    width = event.width.toInt(),
+                    height = event.height.toInt(),
+                )
+            }
+            is Event.PcMirrorFrame -> {
+                val pkt = PcMirrorPacket(
+                    pcId = event.id,
+                    keyframe = event.keyframe,
+                    timeUs = event.timeUs.toLong(),
+                    data = event.data,
+                )
+                if (pkt.keyframe) {
+                    lastPcMirrorKeyframe = pkt
+                }
+                _pcMirrorPackets.tryEmit(pkt)
+            }
+            is Event.PcMirrorEnded -> {
+                if (_pcMirrorConfig.value?.pcId == event.id) {
+                    _pcMirrorConfig.value = null
+                }
+                if (lastPcMirrorKeyframe?.pcId == event.id) {
+                    lastPcMirrorKeyframe = null
+                }
+            }
+            // A PC that's gone isn't playing for this phone anymore; it
+            // sends what plays when it's back.
+            is Event.LinkChanged -> {
+                if (event.link is Link.Offline) {
+                    scope.launch(Dispatchers.Default) {
+                        pcMedia.update(event.id, "", emptyList())
+                    }
+                    pcSpeakerPlayer.stop()
+                    if (_pcMirrorConfig.value?.pcId == event.id) {
+                        _pcMirrorConfig.value = null
+                    }
+                    if (lastPcMirrorKeyframe?.pcId == event.id) {
+                        lastPcMirrorKeyframe = null
+                    }
+                } else if (event.link is Link.Online) {
+                    wakeTimers.remove(event.id)?.cancel()
+                    scope.launch(Dispatchers.Default) {
+                        accent.syncNow()
+                    }
+                }
+            }
+            is Event.DeviceAdded -> ConnectionService.start(context)
+            is Event.DeviceRemoved -> {
+                wakeTimers.remove(event.id)?.cancel()
+                scope.launch(Dispatchers.Default) {
+                    pcMedia.update(event.id, "", emptyList())
+                    pcNotificationPoster.cancelAll(event.id)
+                }
+                pcSpeakerPlayer.stop()
+                if (_pcMirrorConfig.value?.pcId == event.id) {
+                    _pcMirrorConfig.value = null
+                }
+                if (lastPcMirrorKeyframe?.pcId == event.id) {
+                    lastPcMirrorKeyframe = null
+                }
+                if (_state.value.devices.isEmpty()) ConnectionService.stop(context)
+            }
+            is Event.Paired -> ConnectionService.start(context)
+            is Event.VideoQuality -> io.github.robertcjla.broche.video.VideoPreferences.setHigh(context, event.high, event.at)
+            is Event.ClipboardReceived -> scope.launch(Dispatchers.IO) { onClipboardReceived(event.id) }
+            is Event.ClipboardHistoryChanged -> scope.launch(Dispatchers.IO) {
+                refreshClipboardHistory()
+                refreshTimeline()
+            }
+            is Event.TimelineChanged -> scope.launch(Dispatchers.IO) { refreshTimeline() }
+            is Event.LocalSendChanged -> scope.launch(Dispatchers.IO) { syncLocalSendState() }
+            is Event.QueueChanged -> refreshSendQueue()
+            is Event.QueueDroppedOnUnpair -> {
+                if (event.droppedCount > 0u) {
+                    val name = event.deviceName.ifBlank { context.getString(R.string.your_pc) }
+                    _messages.tryEmit(
+                        context.resources.getQuantityString(
+                            R.plurals.send_queue_dropped_unpair,
+                            event.droppedCount.toInt(),
+                            event.droppedCount.toInt(),
+                            name,
+                        ),
+                    )
+                }
+                refreshSendQueue()
+            }
+            else -> {}
+        }
+    }
+
+    private fun onClipboardReceived(pcId: String) {
+        if (!io.github.robertcjla.broche.ui.Preferences.isSuggestClipboardActionsEnabled(context)) return
+        val suggestion = runCatching { node?.lastClipSuggestion() }.getOrNull() ?: return
+        val pcName = _state.value.nameOf(pcId).orEmpty()
+        val from = pcName.ifEmpty { context.getString(R.string.your_pc) }
+        val message = context.getString(R.string.clip_received_from, from)
+        val actionLabel = LinkNotifications.actionLabel(context, suggestion.kind)
+        _clipSuggestions.tryEmit(ClipSuggestionNotice(message, actionLabel, suggestion))
+        LinkNotifications.showClipSuggestion(context, pcName, suggestion)
+    }
+
+    /** Executes the action for a smart clipboard suggestion. */
+    fun runClipSuggestion(suggestion: io.github.robertcjla.broche.ffi.ClipSuggestion) {
+        LinkNotifications.runSuggestion(context, suggestion)
+    }
+
+    // ---- Files ----
+
+    private fun onTransfer(transfer: Transfer) {
+        val pc = _state.value.nameOf(transfer.deviceId).orEmpty()
+        TransferNotifications.update(context, transfer, pc)
+        val done = transfer.status as? TransferStatus.Done ?: return
+        if (transfer.direction != TransferDirection.INCOMING) {
+            scope.launch(Dispatchers.IO) { refreshDataRetention() }
+            return
+        }
+        // Out of the app's cache, into Downloads, then tell the user.
+        scope.launch(Dispatchers.IO) {
+            val published = done.saved.flatMap { ReceivedFiles.publish(context, java.io.File(it)) }
+            if (published.isNotEmpty()) {
+                if (published.size == 1 && transfer.files <= 1u) {
+                    val first = published.first()
+                    val label = transfer.names.firstOrNull()?.takeIf(String::isNotBlank)
+                        ?: first.name.ifBlank { "File" }
+                    PhoneClipboard.setFileUri(context, first.uri, label)
+                }
+                val title = transferTitle(context.resources, transfer)
+                val detail = if (transfer.files > 1u) {
+                    context.resources.getQuantityString(R.plurals.transfer_files, transfer.files.toInt(), transfer.files.toInt())
+                } else {
+                    ""
+                }
+                node?.updateTimelineByRef(
+                    transfer.id,
+                    TimelineKind.FILE,
+                    title,
+                    detail,
+                    published.first().uri.toString(),
+                    transfer.total,
+                )
+                refreshTimeline()
+            } else {
+                refreshDataRetention()
+            }
+            TransferNotifications.received(context, transfer, published, pc)
+        }
+    }
+
+    /** Opens this phone's screen stream to a PC (after the user agreed). */
+    suspend fun mirrorOpen(pcId: String): MirrorStream {
+        startJob?.join()
+        val node = checkNotNull(node) { "the core isn't running" }
+        return node.mirrorOpen(pcId)
+    }
+
+    /** Opens this phone's sound stream to a PC that asked for it with the screen. */
+    suspend fun mirrorOpenAudio(pcId: String): MirrorStream {
+        startJob?.join()
+        val node = checkNotNull(node) { "the core isn't running" }
+        return node.mirrorOpenAudio(pcId)
+    }
+
+    /** Opens this phone's camera stream to a PC (`webcam`), or emits a message on failure. */
+    suspend fun webcamOpenOrMessage(pcId: String): MirrorStream? {
+        startJob?.join()
+        val node = node ?: return null
+        return try {
+            node.webcamOpen(pcId)
+        } catch (e: BrocheException) {
+            val name = _state.value.nameOf(pcId).orEmpty()
+            val msg = when (e) {
+                is BrocheException.Denied -> context.getString(R.string.webcam_denied_text, name)
+                else -> describe(e)
+            }
+            _messages.tryEmit(msg)
+            null
+        }
+    }
+
+    fun clearWebcamRequest(pcId: String? = null) {
+        if (pcId != null) WebcamRequests.dismiss(context, pcId)
+        _state.update { s ->
+            if (pcId == null || s.webcamRequest?.pcId == pcId) s.copy(webcamRequest = null) else s
+        }
+    }
+
+    /** Sends a captured photo or scanned document back to the requesting PC (`camera.result`). */
+    fun sendCameraCaptureResult(
+        pcId: String,
+        requestId: String,
+        mode: String,
+        fileName: String,
+        mime: String,
+        width: Int,
+        height: Int,
+        data: ByteArray,
+    ) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            val currentNode = node ?: return@launch
+            try {
+                currentNode.sendCameraCaptureResult(
+                    pcId = pcId,
+                    requestId = requestId,
+                    mode = mode,
+                    fileName = fileName,
+                    mime = mime,
+                    width = width.coerceAtLeast(1).toUInt(),
+                    height = height.coerceAtLeast(1).toUInt(),
+                    data = data,
+                )
+            } catch (e: BrocheException) {
+                _messages.tryEmit(describe(e))
+            }
+        }
+    }
+
+    /** Notifies the requesting PC that a Continuity Camera capture was cancelled (`camera.cancel`). */
+    fun cancelCameraCapture(pcId: String, requestId: String, reason: String? = null) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            runCatching { node?.cancelCameraCapture(pcId, requestId, reason) }
+        }
+    }
+
+    /**
+     * Sends picked or shared files to a PC; problems arrive as messages.
+     */
+    fun sendFiles(pcId: String, uris: List<Uri>, handoff: Boolean = false) {
+        scope.launch(Dispatchers.IO) {
+            send(pcId, OutgoingFiles.open(context, uris), handoff)
+        }
+    }
+
+    /** Sends a folder the user picked, with everything in it. */
+    fun sendFolder(pcId: String, tree: Uri) {
+        scope.launch(Dispatchers.IO) {
+            val files = try {
+                OutgoingFiles.openFolder(context, tree)
+            } catch (_: OutgoingFiles.TooManyFiles) {
+                _messages.tryEmit(context.getString(R.string.transfer_too_many))
+                return@launch
+            } catch (e: Exception) {
+                Log.w(TAG, "can't read a picked folder", e)
+                emptyList()
+            }
+            send(pcId, files)
+        }
+    }
+
+    private suspend fun send(pcId: String, files: List<FileToSend>, handoff: Boolean = false) {
+        if (files.isEmpty()) {
+            _messages.tryEmit(context.getString(R.string.transfer_nothing))
+            return
+        }
+        PendingFiles(files).use { pending ->
+            startJob?.join()
+            val node = node ?: return
+            val wasOnline = _state.value.device(pcId)?.online == true
+            try {
+                val singleFileName = if (files.size == 1) {
+                    when (val f = files[0]) {
+                        is FileToSend.Fd -> f.name.takeIf { f.folder == null }
+                        is FileToSend.Path -> f.name.takeIf { f.folder == null }
+                    }
+                } else {
+                    null
+                }
+                val returnedId = if (handoff && singleFileName != null && io.github.robertcjla.broche.ffi.isSafeHandoffDocument(singleFileName)) {
+                    node.sendHandoffFiles(pcId, pending.take())
+                } else {
+                    node.sendFiles(pcId, pending.take())
+                }
+                refreshSendQueue()
+                if (!wasOnline) {
+                    val name = _state.value.nameOf(pcId).orEmpty()
+                    val qid = runCatching { node.latestQueuedIdForPeer(pcId) }.getOrNull()
+                        ?: returnedId.takeIf { it.isNotBlank() }
+                    emitOfflineQueuedNotice(pcId, name, qid)
+                }
+            } catch (e: BrocheException) {
+                val name = _state.value.nameOf(pcId).orEmpty()
+                _messages.tryEmit(
+                    if (e is BrocheException.Denied) context.getString(R.string.transfer_off_for, name) else describe(e),
+                )
+            }
+        }
+    }
+
+    fun acceptTransfer(id: String) {
+        scope.launch(Dispatchers.IO) { runCatching { node?.acceptTransfer(id) } }
+    }
+
+    fun cancelTransfer(id: String) {
+        scope.launch(Dispatchers.IO) { runCatching { node?.cancelTransfer(id) } }
+    }
+
+    fun pauseTransfer(id: String) {
+        scope.launch(Dispatchers.IO) { runCatching { node?.pauseTransfer(id) } }
+    }
+
+    fun resumeTransfer(id: String) {
+        scope.launch(Dispatchers.IO) { runCatching { node?.resumeTransfer(id) } }
+    }
+
+    // ---- Send Queue ----
+
+    private val refreshQueueRunning = java.util.concurrent.atomic.AtomicBoolean(false)
+    private val refreshQueuePending = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    fun refreshSendQueue() {
+        refreshQueuePending.set(true)
+        if (!refreshQueueRunning.compareAndSet(false, true)) return
+        scope.launch(Dispatchers.IO) {
+            try {
+                while (refreshQueuePending.compareAndSet(true, false)) {
+                    val currentNode = node ?: break
+                    val items = runCatching { currentNode.sendQueue(null).map { it.toUi() } }.getOrDefault(emptyList())
+                    _state.update { prev ->
+                        val merged = items.map { item ->
+                            if (item.kind.isFileBacked() && item.status is io.github.robertcjla.broche.ffi.FfiQueueStatus.Sending) {
+                                val targetId = item.activeTransferId ?: item.id
+                                val liveTransfer = prev.transfers.firstOrNull {
+                                    it.id == targetId && it.direction == TransferDirection.OUTGOING
+                                }
+                                val prevItem = prev.sendQueue.firstOrNull { it.id == item.id }
+                                val liveDone = maxOf(
+                                    item.bytesDone,
+                                    liveTransfer?.done?.toLong() ?: 0L,
+                                    prevItem?.bytesDone ?: 0L,
+                                )
+                                val liveTotal = if (item.totalBytes > 0L) {
+                                    item.totalBytes
+                                } else {
+                                    liveTransfer?.total?.toLong() ?: prevItem?.totalBytes ?: 0L
+                                }
+                                item.copy(
+                                    totalBytes = liveTotal.coerceAtLeast(0L),
+                                    bytesDone = liveDone.coerceIn(0L, liveTotal.coerceAtLeast(0L)),
+                                )
+                            } else {
+                                item
+                            }
+                        }
+                        prev.copy(sendQueue = merged)
+                    }
+                }
+            } finally {
+                refreshQueueRunning.set(false)
+                if (refreshQueuePending.get()) {
+                    refreshSendQueue()
+                }
+            }
+        }
+    }
+
+    fun cancelQueueItem(id: String) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            runCatching { node?.cancelQueueItem(id) }
+            refreshSendQueue()
+        }
+    }
+
+    fun cancelAllQueueItems(peerId: String? = null) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            runCatching { node?.cancelAllQueueItems(peerId) }
+            refreshSendQueue()
+        }
+    }
+
+    fun retryQueueItem(id: String) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            runCatching { node?.retryQueueItem(id) }
+            refreshSendQueue()
+        }
+    }
+
+    fun clearFinishedQueueItems(peerId: String? = null) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            runCatching { node?.clearFinishedQueueItems(peerId) }
+            refreshSendQueue()
+        }
+    }
+
+    private fun emitOfflineQueuedNotice(pcId: String, pcName: String, queueId: String? = null) {
+        val resolvedQueueId = queueId ?: runCatching { node?.latestQueuedIdForPeer(pcId) }.getOrNull()
+        val displayName = pcName.ifBlank { context.getString(R.string.your_pc) }
+        val message = context.getString(R.string.send_queue_offline_toast, displayName)
+        _queuedNotices.tryEmit(
+            OfflineQueuedNotice(
+                message = message,
+                queueId = resolvedQueueId,
+                peerId = pcId,
+            ),
+        )
+    }
+
+    // ---- LocalSend interop & Mobile Data (Away mode) ----
+
+    /** Renames this phone for PCs; empty goes back to the system's name. */
+    fun setPhoneName(name: String) {
+        io.github.robertcjla.broche.ui.Preferences.setDeviceName(context, cleanDeviceName(name))
+        val resolved = phoneName(context)
+        _state.update { it.copy(phoneName = resolved) }
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            runCatching { node?.setDeviceName(resolved) }
+        }
+    }
+
+    fun setAwayMode(enabled: Boolean) {
+        io.github.robertcjla.broche.ui.Preferences.setAwayModeEnabled(context, enabled)
+        _state.update { it.copy(awayMode = enabled) }
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            runCatching { node?.setAwayMode(enabled) }
+        }
+    }
+
+    fun setLocalSendEnabled(enabled: Boolean) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            val currentNode = node ?: return@launch
+            try {
+                currentNode.setLocalsendEnabled(enabled)
+            } catch (e: BrocheException) {
+                _messages.tryEmit(describe(e))
+            }
+            localsendMulticast?.runCatching { if (enabled) acquire() else release() }
+            syncLocalSendState()
+        }
+    }
+
+    fun refreshLocalSend() {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            val currentNode = node ?: return@launch
+            runCatching { currentNode.refreshLocalsend() }
+            syncLocalSendState()
+        }
+    }
+
+    private fun syncLocalSendState() {
+        val currentNode = node ?: return
+        val enabled = runCatching { currentNode.localsendEnabled() }.getOrDefault(false)
+        val peers = if (enabled) {
+            runCatching { currentNode.localsendPeers() }.getOrDefault(emptyList())
+        } else {
+            emptyList()
+        }
+        localsendMulticast?.runCatching { if (enabled) acquire() else release() }
+        _state.update { it.copy(localsendEnabled = enabled, localsendPeers = peers) }
+    }
+
+    // ---- Clipboard ----
+
+    @Volatile private var lastAutoSentClip: Pair<String, String?>? = null
+    @Volatile private var lastAutoSentAtMs: Long = 0L
+
+    /**
+     * Sends text (and optional HTML) to every connected PC (or to `pcId` when chosen via Direct Share);
+     * returns what to tell the user. Waits for the core when the app was just launched.
+     */
+    suspend fun sendClipboard(text: String, pcId: String? = null, html: String? = null): String =
+        sendToPcs(image = false, pcId = pcId) { node, pc -> node.sendClipboardRich(pc, text, html, null) }
+
+    /**
+     * Automatically sends non-sensitive text copied in the background while Elevated mode is running.
+     * Skips clips Broche itself wrote from a PC (`PhoneClipboard.isRecentEcho`).
+     */
+    fun onElevatedClipboardChanged(text: String, html: String?) {
+        if (text.isBlank() || PhoneClipboard.isRecentEcho(text, html)) return
+        if (!io.github.robertcjla.broche.ui.Preferences.isAutoClipboardEnabled(context)) return
+        val now = android.os.SystemClock.elapsedRealtime()
+        val key = text to html
+        if (lastAutoSentClip == key && (now - lastAutoSentAtMs) in 0..1_500L) return
+        lastAutoSentClip = key
+        lastAutoSentAtMs = now
+        PhoneClipboard.recordLocalCopy(text, html)
+        scope.launch(Dispatchers.IO) {
+            if (Build.FINGERPRINT.startsWith("generic") || Build.HARDWARE.contains("ranchu")) {
+                delay(80)
+            }
+            startJob?.join()
+            val currentNode = node ?: return@launch
+            val onlinePcs = _state.value.devices.filter { it.online }
+            for (pc in onlinePcs) {
+                runCatching { currentNode.sendClipboardRich(pc.id, text, html, null) }
+                    .onFailure { Log.d(TAG, "auto clipboard not sent to ${pc.id}: $it") }
+            }
+        }
+    }
+
+    private fun targetPcsForSend(pcId: String?): List<Device> {
+        val all = _state.value.devices
+        if (pcId != null) {
+            return all.filter { it.id == pcId }
+        }
+        val online = all.filter { it.online }
+        return if (online.isNotEmpty()) online else all
+    }
+
+    /** Sends a copied image to the connected PCs (or to `pcId`, queueing if offline); returns what to tell the user. */
+    suspend fun sendClipboardImage(uri: Uri, pcId: String? = null): String {
+        startJob?.join()
+        val targets = targetPcsForSend(pcId)
+        if (targets.isEmpty()) return context.getString(R.string.clip_no_pc)
+        val image = when (val read = withContext(Dispatchers.IO) { PhoneClipboard.readImage(context, uri) }) {
+            is PhoneClipboard.ImageResult.Ready -> read.image
+            PhoneClipboard.ImageResult.TooLarge -> return context.getString(R.string.clip_image_too_large)
+            PhoneClipboard.ImageResult.Unreadable -> return context.getString(R.string.clip_image_unreadable)
+        }
+        return sendToPcs(image = true, pcId = pcId) { node, pc -> node.sendClipboardImage(pc, image.mime, image.bytes) }
+    }
+
+    private suspend fun sendToPcs(
+        image: Boolean,
+        pcId: String? = null,
+        send: suspend (BrocheNode, String) -> Unit,
+    ): String {
+        startJob?.join()
+        val node = node ?: return context.getString(R.string.clip_no_pc)
+        val pcs = targetPcsForSend(pcId)
+        if (pcs.isEmpty()) return context.getString(R.string.clip_no_pc)
+        val sentTo = mutableListOf<String>()
+        val queuedTo = mutableListOf<Device>()
+        var lastQueueId: String? = null
+        var failure: String? = null
+        for (pc in pcs) {
+            val wasOnline = pc.online
+            try {
+                send(node, pc.id)
+                if (wasOnline) {
+                    sentTo += pc.name
+                } else {
+                    queuedTo += pc
+                    lastQueueId = runCatching { node.latestQueuedIdForPeer(pc.id) }.getOrNull()
+                }
+            } catch (e: BrocheException) {
+                failure = when (e) {
+                    is BrocheException.Denied -> context.getString(R.string.clip_off_for, pc.name)
+                    is BrocheException.TooLarge -> context.getString(
+                        if (image) R.string.clip_image_too_large else R.string.clip_too_large,
+                    )
+                    is BrocheException.Unsupported ->
+                        if (image) context.getString(R.string.clip_image_unsupported, pc.name) else describe(e)
+                    else -> describe(e)
+                }
+            }
+        }
+        if (queuedTo.isNotEmpty()) {
+            refreshSendQueue()
+            val names = queuedTo.joinToString { it.name }
+            val msg = context.getString(R.string.send_queue_offline_toast, names)
+            _queuedNotices.tryEmit(
+                OfflineQueuedNotice(
+                    message = msg,
+                    queueId = if (queuedTo.size == 1) lastQueueId else null,
+                    peerId = queuedTo.singleOrNull()?.id,
+                ),
+            )
+            if (sentTo.isEmpty()) {
+                return msg
+            }
+        }
+        return if (sentTo.isNotEmpty()) context.getString(R.string.clip_sent_to, sentTo.joinToString()) else failure.orEmpty()
+    }
+
+    private fun refreshClipboardHistory() {
+        val currentNode = node ?: return
+        val enabled = runCatching { currentNode.clipboardHistoryEnabled() }.getOrDefault(true)
+        val items = if (enabled) {
+            runCatching { currentNode.clipboardHistory(null) }.getOrDefault(emptyList())
+        } else {
+            emptyList()
+        }
+        _state.update { it.copy(clipboardHistoryEnabled = enabled, clipboardHistory = items) }
+        refreshDataRetention()
+    }
+
+    fun setClipboardHistoryEnabled(enabled: Boolean) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            val currentNode = node ?: return@launch
+            runCatching { currentNode.setClipboardHistoryEnabled(enabled) }
+            refreshClipboardHistory()
+        }
+    }
+
+    fun copyClipboardHistory(id: String) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            val currentNode = node ?: return@launch
+            try {
+                currentNode.copyClipboardHistory(id)
+                // Android 13 and later confirm copies themselves.
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                    _messages.tryEmit(context.getString(R.string.clipboard_history_copied))
+                }
+            } catch (e: BrocheException) {
+                _messages.tryEmit(describe(e))
+            }
+        }
+    }
+
+    fun pinClipboardHistory(id: String, pinned: Boolean) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            node?.pinClipboardHistory(id, pinned)
+            refreshClipboardHistory()
+        }
+    }
+
+    fun deleteClipboardHistory(id: String) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            node?.deleteClipboardHistory(id)
+            refreshClipboardHistory()
+        }
+    }
+
+    fun clearClipboardHistory() {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            runCatching { node?.clearClipboardHistory() }
+            refreshClipboardHistory()
+        }
+    }
+
+    suspend fun clipboardHistoryImage(id: String): ByteArray? = withContext(Dispatchers.IO) {
+        startJob?.join()
+        node?.clipboardHistoryImage(id)
+    }
+
+    // ---- Timeline ----
+
+    private fun refreshTimeline() {
+        val currentNode = node ?: return
+        val retention = runCatching { currentNode.timelineRetention() }.getOrNull()
+        val page = runCatching { currentNode.timelinePage(null, null, null, 0u, 100u) }.getOrNull()
+        _state.update {
+            it.copy(
+                timeline = page?.items ?: it.timeline,
+                timelineTotal = page?.total ?: it.timelineTotal,
+                timelineHasMore = page?.hasMore ?: it.timelineHasMore,
+                timelineRetentionDays = retention?.maxDays ?: it.timelineRetentionDays,
+            )
+        }
+        refreshDataRetention()
+    }
+
+    suspend fun queryTimelinePage(
+        kind: TimelineKind?,
+        deviceId: String?,
+        search: String?,
+        offset: UInt,
+        limit: UInt = 100u,
+    ): TimelinePage? = withContext(Dispatchers.IO) {
+        startJob?.join()
+        runCatching { node?.timelinePage(kind, deviceId, search, offset, limit) }.getOrNull()
+    }
+
+    fun setTimelineRetentionDays(days: UInt) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            runCatching { node?.setTimelineRetention(days, 5_000u) }
+            refreshTimeline()
+        }
+    }
+
+    fun deleteTimelineEntry(id: Long) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            runCatching { node?.deleteTimelineEntry(id) }
+            refreshTimeline()
+        }
+    }
+
+    fun clearTimeline() {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            runCatching { node?.clearTimeline() }.onFailure {
+                Log.w(TAG, "couldn't clear the Timeline", it)
+                _messages.tryEmit(context.getString(R.string.data_clear_failed))
+            }
+            refreshTimeline()
+        }
+    }
+
+    // ---- Data retention & Clear everything ----
+
+    private fun pruneOldTempCaches() {
+        val cutoff = System.currentTimeMillis() - 24L * 60 * 60 * 1000
+        listOf("continuity_camera", "clipboard").forEach { dirName ->
+            java.io.File(context.cacheDir, dirName).listFiles()?.forEach { file ->
+                if (file.isFile && file.lastModified() in 1 until cutoff) {
+                    runCatching { file.delete() }
+                }
+            }
+        }
+    }
+
+    private fun refreshDataRetention() {
+        val counts = runCatching { node?.dataRetentionCounts() }.getOrNull()
+        val photoFiles = listOf("continuity_camera", "clipboard").sumOf { dirName ->
+            java.io.File(context.cacheDir, dirName).listFiles()?.count { it.isFile } ?: 0
+        }
+        val mmsFiles = java.io.File(context.cacheDir, "mms")
+            .listFiles()
+            ?.count { it.isFile && it.name.endsWith(".mms", ignoreCase = true) } ?: 0
+        _state.update {
+            it.copy(
+                receivedFileRecords = counts?.receivedFileRecords?.toInt() ?: it.receivedFileRecords,
+                cachedPhotoFiles = photoFiles,
+                cachedMmsFiles = mmsFiles,
+            )
+        }
+    }
+
+    fun clearMessageCache() {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            java.io.File(context.cacheDir, "mms").listFiles()?.forEach { file ->
+                if (file.isFile && file.name.endsWith(".mms", ignoreCase = true)) {
+                    runCatching { file.delete() }
+                }
+            }
+            runCatching { node?.clearMessageCache() }.onFailure {
+                Log.w(TAG, "couldn't clear the message cache", it)
+                _messages.tryEmit(context.getString(R.string.data_clear_failed))
+            }
+            refreshDataRetention()
+        }
+    }
+
+    fun clearPhotoThumbnailsCache() {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            listOf("continuity_camera", "clipboard").forEach { dirName ->
+                java.io.File(context.cacheDir, dirName).listFiles()?.forEach { file ->
+                    runCatching { file.deleteRecursively() }
+                }
+            }
+            refreshDataRetention()
+        }
+    }
+
+    fun clearReceivedFileHistory() {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            java.io.File(context.cacheDir, "received").listFiles()?.forEach { file ->
+                runCatching { file.deleteRecursively() }
+            }
+            _state.update { s -> s.copy(transfers = s.transfers.filterNot { it.isFinished() }) }
+            runCatching { node?.clearReceivedFileHistory() }.onFailure {
+                Log.w(TAG, "couldn't clear the received file history", it)
+                _messages.tryEmit(context.getString(R.string.data_clear_failed))
+            }
+            refreshTimeline()
+            refreshDataRetention()
+        }
+    }
+
+    fun clearEverything() {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            val failed = runCatching { node?.clearAllLocalData() }
+                .onFailure { Log.w(TAG, "couldn't clear local data", it) }
+                .isFailure
+            listOf("mms", "continuity_camera", "clipboard", "received").forEach { dirName ->
+                java.io.File(context.cacheDir, dirName).listFiles()?.forEach { file ->
+                    runCatching { file.deleteRecursively() }
+                }
+            }
+            _state.update { s -> s.copy(transfers = s.transfers.filterNot { it.isFinished() }) }
+            refreshClipboardHistory()
+            refreshTimeline()
+            refreshSendQueue()
+            refreshDataRetention()
+            _messages.tryEmit(
+                context.getString(if (failed) R.string.data_clear_failed else R.string.data_cleared_everything_toast),
+            )
+        }
+    }
+
+    fun resendTimelineEntry(entry: TimelineEntry) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            val currentNode = node ?: return@launch
+            val pcName = _state.value.nameOf(entry.deviceId).orEmpty().ifEmpty { context.getString(R.string.your_pc) }
+            val wasOnline = _state.value.device(entry.deviceId)?.online == true
+            when (entry.kind) {
+                TimelineKind.CLIP -> {
+                    val clipId = entry.refId ?: return@launch
+                    try {
+                        currentNode.resendClipboardHistory(clipId, entry.deviceId)
+                        if (wasOnline) {
+                            _messages.tryEmit(context.getString(R.string.clip_sent_to, pcName))
+                        } else {
+                            refreshSendQueue()
+                            emitOfflineQueuedNotice(entry.deviceId, pcName)
+                        }
+                    } catch (e: BrocheException) {
+                        _messages.tryEmit(describe(e))
+                    }
+                }
+                TimelineKind.LINK -> {
+                    val url = entry.target.ifEmpty { entry.title }
+                    val msg = openLinkOnPc(entry.deviceId, url)
+                    if (wasOnline) {
+                        _messages.tryEmit(msg)
+                    }
+                }
+                TimelineKind.FILE, TimelineKind.PHOTO -> {
+                    val target = entry.target
+                    when {
+                        target.startsWith("content://") -> sendFiles(entry.deviceId, listOf(Uri.parse(target)))
+                        target.isNotEmpty() && java.io.File(target).exists() -> {
+                            val f = java.io.File(target)
+                            send(
+                                entry.deviceId,
+                                listOf(
+                                    FileToSend.Path(
+                                        path = f.absolutePath,
+                                        name = f.name,
+                                        folder = null,
+                                    ),
+                                ),
+                            )
+                        }
+                    }
+                }
+                TimelineKind.SESSION -> Unit
+            }
+        }
+    }
+
+    /** What this phone offers PCs (docs/protocol/capabilities.md). */
+    private fun capabilities(notificationAccess: Boolean): List<String> =
+        CLIPBOARD_CAPABILITIES +
+            toggles.capabilities() +
+            (if (notificationAccess) NOTIFICATION_CAPABILITIES + MEDIA_CAPABILITIES else emptyList()) +
+            (if (notificationAccess && NotificationListener.canReadSensitive(context)) listOf("notify.sensitive") else emptyList()) +
+            (if (_state.value.photoAccess) PHOTO_CAPABILITIES else emptyList()) +
+            (if (PhoneCalls.canFollow(context)) listOf("call.state") else emptyList()) +
+            (if (PhoneCalls.canControl(context)) listOf("call.control") else emptyList()) +
+            (if (PhoneCalls.canControl(context) && CallCompanion.allowed(context)) listOf("call.incall") else emptyList()) +
+            (if (PhoneCalls.canReadLog(context)) listOf("call.log") else emptyList()) +
+            (if (PhoneCalls.canDial(context)) listOf("call.dial") else emptyList()) +
+            (if (PhoneContacts.canRead(context)) listOf("contacts.read") else emptyList()) +
+            (if (PhoneSms.canRead(context)) listOf("sms.read") else emptyList()) +
+            (if (PhoneSms.canSend(context)) listOf("sms.send") else emptyList()) +
+            PhoneStorage.capabilities(context) +
+            (if (WebcamService.hasPermission(context)) listOf("camera.stream") else emptyList()) +
+            (if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) listOf("camera.capture") else emptyList()) +
+            (if (InputService.running || Elevated.running) listOf("mirror.input") else emptyList()) +
+            (if (Elevated.running) listOf("clip.read.auto") else emptyList()) +
+            // Apps in windows of their own run on displays the Elevated helper makes.
+            (if (Elevated.running && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) listOf("mirror.virtual_display") else emptyList()) +
+            // Asked for when a PC wants the sound, or streamed via Elevated helper.
+            (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || Elevated.running) listOf("mirror.audio.playback") else emptyList())
+
+    /**
+     * Elevated while the wireless debugging helper runs, Assist when the
+     * user turned on control from the PC.
+     */
+    private fun powerLevel(): PowerLevel = when {
+        Elevated.running -> PowerLevel.ELEVATED
+        InputService.running -> PowerLevel.ASSIST
+        else -> PowerLevel.BASIC
+    }
+
+    // ---- Pairing ----
+
+    /**
+     * Pairs with a link that arrived before the core finished starting (the
+     * app was launched by opening the link).
+     */
+    fun joinWhenReady(link: String) {
+        scope.launch {
+            startJob?.join()
+            joinWithLink(link)
+        }
+    }
+
+    /** Pairs with the PC whose QR code was scanned. */
+    fun joinWithLink(link: String) = command {
+        _state.update { it.copy(pairing = PairingState.Joining) }
+        try {
+            it.pairingJoin(link)
+        } catch (e: BrocheException) {
+            val failure = when (e) {
+                is BrocheException.InvalidPairingLink -> PairingFailure.Other("not a Broche code")
+                is BrocheException.Denied -> PairingFailure.Rejected
+                else -> PairingFailure.Unreachable
+            }
+            _state.update { s -> s.copy(pairing = PairingState.Failed(failure)) }
+        }
+    }
+
+    /** Pairs with a nearby PC that shows its pairing screen. */
+    fun pairNearby(peer: String) = command {
+        _state.update { it.copy(pairing = PairingState.Connecting(peer)) }
+        try {
+            it.pairingStartNearby(peer)
+        } catch (e: BrocheException) {
+            _state.update { s ->
+                if (s.pairing is PairingState.Connecting) s.copy(pairing = PairingState.Failed(PairingFailure.Unreachable)) else s
+            }
+        }
+    }
+
+    fun confirmCode(matches: Boolean) {
+        val comparing = _state.value.pairing as? PairingState.Comparing ?: return
+        _state.update {
+            it.copy(
+                pairing = if (matches) PairingState.Confirmed(comparing.peer, comparing.code)
+                else PairingState.Failed(PairingFailure.Declined),
+            )
+        }
+        scope.launch(Dispatchers.IO) { runCatching { node?.pairingConfirm(matches) } }
+    }
+
+    /** Keeps local discovery working while the pairing screen is open. */
+    fun setPairingScreenOpen(open: Boolean) {
+        pairingMulticast?.runCatching { if (open) acquire() else release() }
+    }
+
+    fun resetPairing() {
+        _state.update { it.copy(pairing = PairingState.Idle) }
+        scope.launch(Dispatchers.IO) { runCatching { node?.pairingCancel() } }
+    }
+
+    // ---- Devices ----
+
+    fun ring(id: String, on: Boolean) = command { it.ring(id, on) }
+
+    /** Locks a PC, or puts it to sleep; says how it went. */
+    fun pcPower(id: String, sleep: Boolean) {
+        scope.launch {
+            startJob?.join()
+            val node = node ?: return@launch
+            val name = _state.value.nameOf(id).orEmpty()
+            val message = try {
+                node.pcPower(id, sleep)
+                context.getString(if (sleep) R.string.pc_sleeping else R.string.pc_locked, name)
+            } catch (e: BrocheException) {
+                if (e is BrocheException.Denied) context.getString(R.string.pc_actions_off, name) else describe(e)
+            }
+            _messages.tryEmit(message)
+        }
+    }
+
+    /**
+     * Sends Wake-on-LAN magic packets to a sleeping or shut-down PC and waits
+     * up to ~60 s for it to connect before showing troubleshooting tips.
+     */
+    fun wake(id: String) {
+        wakeTimers.remove(id)?.cancel()
+        _state.update { it.withWakeState(id, WakeState.Waking) }
+        val timer = scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            val node = node ?: return@launch
+            repeat(15) {
+                delay(4_000)
+                val dev = _state.value.device(id)
+                if (dev == null || dev.online || dev.wakeState != WakeState.Waking) return@launch
+                runCatching { node.refresh() }
+            }
+            _state.update { s ->
+                val dev = s.device(id)
+                if (dev != null && !dev.online && dev.wakeState == WakeState.Waking) {
+                    s.withWakeState(id, WakeState.TimedOut)
+                } else {
+                    s
+                }
+            }
+        }
+        wakeTimers[id] = timer
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            val node = node ?: return@launch
+            try {
+                node.wake(id)
+                node.refresh()
+            } catch (e: BrocheException) {
+                wakeTimers.remove(id)?.cancel()
+                _state.update { it.withWakeState(id, WakeState.Idle) }
+                val name = _state.value.nameOf(id).orEmpty()
+                val msg = when (e) {
+                    is BrocheException.Unsupported -> context.getString(R.string.wake_not_ready, name)
+                    else -> describe(e)
+                }
+                _messages.tryEmit(msg)
+            }
+        }
+    }
+
+    /** Opens a link, video with timestamp, or map location on a PC; returns what to tell the user. */
+    suspend fun openLinkOnPc(id: String, url: String): String {
+        startJob?.join()
+        val node = node ?: return context.getString(R.string.clip_no_pc)
+        val name = _state.value.nameOf(id).orEmpty()
+        val wasOnline = _state.value.device(id)?.online == true
+        val handoff = io.github.robertcjla.broche.ffi.extractHandoffLink(url)
+        val finalUrl = if (
+            handoff != null &&
+            handoff.kind == io.github.robertcjla.broche.ffi.HandoffKind.VIDEO_LINK &&
+            handoff.timestampSecs == null
+        ) {
+            val activeSecs = phoneMedia.activePositionSeconds()
+            if (activeSecs != null) io.github.robertcjla.broche.ffi.withVideoTimestamp(handoff.url, activeSecs) else handoff.url
+        } else {
+            handoff?.url ?: url
+        }
+        return try {
+            node.openLink(id, finalUrl)
+            if (wasOnline) {
+                context.getString(R.string.link_opened_on, name)
+            } else {
+                refreshSendQueue()
+                val qid = runCatching { node.latestQueuedIdForPeer(id) }.getOrNull()
+                val displayName = name.ifBlank { context.getString(R.string.your_pc) }
+                val msg = context.getString(R.string.send_queue_offline_toast, displayName)
+                _queuedNotices.tryEmit(
+                    OfflineQueuedNotice(
+                        message = msg,
+                        queueId = qid,
+                        peerId = id,
+                    ),
+                )
+                msg
+            }
+        } catch (e: BrocheException) {
+            describe(e)
+        }
+    }
+
+    // ---- Remote input (phone -> PC) ----
+
+    /** Checks whether a PC accepts mouse, keyboard and presentation input from this phone. */
+    suspend fun remoteCheck(id: String): RemoteAccess {
+        startJob?.join()
+        val node = node ?: return RemoteAccess.Offline
+        return try {
+            node.remoteCheck(id)
+            RemoteAccess.Allowed
+        } catch (e: BrocheException) {
+            when (e) {
+                is BrocheException.Denied -> RemoteAccess.Denied
+                is BrocheException.Unsupported -> RemoteAccess.Unsupported
+                else -> RemoteAccess.Offline
+            }
+        }
+    }
+
+    private val pendingMoveLock = Any()
+    private var pendingMovePcId: String? = null
+    private var pendingMoveDx: Float = 0f
+    private var pendingMoveDy: Float = 0f
+    private var pendingMoveQueued: Boolean = false
+
+    /** Moves a PC's cursor by `(dx, dy)` logical pixels over QUIC datagrams, coalescing rapid 120Hz touch samples. */
+    fun remoteMove(id: String, dx: Float, dy: Float) {
+        val shouldQueue = synchronized(pendingMoveLock) {
+            if (pendingMovePcId != null && pendingMovePcId != id) {
+                pendingMoveDx = 0f
+                pendingMoveDy = 0f
+            }
+            pendingMovePcId = id
+            pendingMoveDx += dx
+            pendingMoveDy += dy
+            if (!pendingMoveQueued) {
+                pendingMoveQueued = true
+                true
+            } else {
+                false
+            }
+        }
+        if (shouldQueue) {
+            remoteOps.trySend { node ->
+                val (targetId, totalDx, totalDy) = synchronized(pendingMoveLock) {
+                    val t = pendingMovePcId
+                    val x = pendingMoveDx
+                    val y = pendingMoveDy
+                    pendingMoveDx = 0f
+                    pendingMoveDy = 0f
+                    pendingMoveQueued = false
+                    Triple(t, x, y)
+                }
+                if (targetId != null && (totalDx != 0f || totalDy != 0f)) {
+                    runCatching { node.remoteMove(targetId, totalDx, totalDy) }
+                }
+            }
+        }
+    }
+
+    /** Scrolls on a PC (`dy` > 0 scrolls down, `dx` > 0 scrolls right, in wheel notches). */
+    fun remoteScroll(id: String, dx: Float, dy: Float, fast: Boolean = true) {
+        remoteOps.trySend { runCatching { it.remoteScroll(id, dx, dy, fast) } }
+    }
+
+    /** Presses, releases or clicks a mouse button (`"left"`, `"right"` or `"middle"`). */
+    fun remoteButton(id: String, button: String, action: String, onStatus: ((RemoteAccess) -> Unit)? = null) =
+        remoteCommand(onStatus) { it.remoteButton(id, button, action) }
+
+    /** Types Unicode text on a PC, splitting long strings into 256-byte chunks. */
+    fun remoteText(id: String, text: String, onStatus: ((RemoteAccess) -> Unit)? = null) =
+        remoteCommand(onStatus) { node ->
+            for (chunk in io.github.robertcjla.broche.ui.remote.UtteranceJoiner.chunkUtf8(text)) {
+                node.remoteText(id, chunk)
+            }
+        }
+
+    /** Presses a named key or shortcut with optional modifiers on a PC. */
+    fun remoteKey(id: String, key: String, mods: List<String> = emptyList(), onStatus: ((RemoteAccess) -> Unit)? = null) =
+        remoteCommand(onStatus) { it.remoteKey(id, key, mods) }
+
+    /** Sends a presentation slide command (`"next"`, `"previous"`, `"start"`, `"stop"`, `"black"`). */
+    fun remoteSlide(id: String, action: String, onStatus: ((RemoteAccess) -> Unit)? = null) =
+        remoteCommand(onStatus) { it.remoteSlide(id, action) }
+
+    /** Moves or hides the laser pointer on a PC (`x`, `y` in `0..1`). */
+    fun remoteLaser(id: String, on: Boolean, x: Float = 0.5f, y: Float = 0.5f) {
+        remoteOps.trySend { runCatching { it.remoteLaser(id, on, x, y) } }
+    }
+
+    /** Asks a paired PC to start streaming its desktop screen to this phone (`mirror.start`, session 0). */
+    fun startPcMirror(id: String, maxSize: Int = 1280, fps: Int = 30, bitrate: Int = 4_000_000) {
+        command {
+            it.startPcMirror(
+                id,
+                maxSize.coerceIn(320, 1920).toUInt(),
+                io.github.robertcjla.broche.video.VideoPreferences.limit(context, fps).toUInt(),
+                bitrate.coerceIn(500_000, 20_000_000).toUInt(),
+            )
+        }
+    }
+
+    /** Stops an active PC-to-phone screen mirror session (`mirror.stop`, session 0). */
+    fun stopPcMirror(id: String) {
+        if (_pcMirrorConfig.value?.pcId == id) {
+            _pcMirrorConfig.value = null
+        }
+        if (lastPcMirrorKeyframe?.pcId == id) {
+            lastPcMirrorKeyframe = null
+        }
+        scope.launch(Dispatchers.IO) {
+            runCatching { node?.mirrorStop(id, 0u) }
+        }
+    }
+
+    /** Requests an immediate IDR keyframe from a paired PC streaming its screen. */
+    fun requestPcMirrorKeyframe(id: String) {
+        remoteOps.trySend { runCatching { it.requestPcMirrorKeyframe(id) } }
+    }
+
+    /** Sends a normalized touch, scroll, key, or text event to a paired PC during reverse mirroring. */
+    fun sendPcMirrorInput(id: String, input: io.github.robertcjla.broche.ffi.MirrorInputEvent) {
+        remoteOps.trySend { runCatching { it.sendPcMirrorInput(id, input) } }
+    }
+
+    private fun remoteCommand(onStatus: ((RemoteAccess) -> Unit)?, block: suspend (BrocheNode) -> Unit) {
+        remoteOps.trySend { node ->
+            try {
+                block(node)
+                onStatus?.invoke(RemoteAccess.Allowed)
+            } catch (e: BrocheException) {
+                val status = when (e) {
+                    is BrocheException.Denied -> RemoteAccess.Denied
+                    is BrocheException.Unsupported -> RemoteAccess.Unsupported
+                    else -> RemoteAccess.Offline
+                }
+                onStatus?.invoke(status)
+            }
+        }
+    }
+
+    // ---- Deck (phone -> PC) ----
+
+    enum class DeckPressResult { Ok, Denied, Offline, NotFound, Failed }
+
+    /** Presses a Deck tile on a paired PC (`deck.press`). */
+    suspend fun deckPress(id: String, tile: String): DeckPressResult {
+        startJob?.join()
+        val node = node ?: return DeckPressResult.Offline
+        return try {
+            node.deckPress(id, tile)
+            DeckPressResult.Ok
+        } catch (e: BrocheException) {
+            when (e) {
+                is BrocheException.Denied -> DeckPressResult.Denied
+                is BrocheException.Offline -> DeckPressResult.Offline
+                is BrocheException.NotFound -> DeckPressResult.NotFound
+                else -> {
+                    _messages.tryEmit(describe(e))
+                    DeckPressResult.Failed
+                }
+            }
+        }
+    }
+
+    /** Sets the PC's master volume (`0..=100` or `200`/`201` for phone speaker relay) and/or mute state (`pc.audio.set`). */
+    fun setPcAudio(id: String, volume: Int? = null, muted: Boolean? = null) {
+        val isSpeakerRelayToggle = volume == 200 || volume == 201
+        val wireVol = if (isSpeakerRelayToggle) {
+            volume.toUByte()
+        } else {
+            volume?.coerceIn(0, 100)?.toUByte()
+        }
+        // Optimistic local state update so the slider, mute button, and phone speaker switch don't snap back while the RPC runs.
+        _state.update { s ->
+            val current = s.device(id)?.deckState
+            if (current != null) {
+                val updatedOutputs = when (volume) {
+                    201 -> if (current.outputDevices.any { it.id == "broche:phone_speaker" }) {
+                        current.outputDevices
+                    } else {
+                        current.outputDevices + io.github.robertcjla.broche.ffi.AudioOutputDevice(
+                            id = "broche:phone_speaker",
+                            name = "Phone speaker (Broche)",
+                            isDefault = false,
+                        )
+                    }
+                    200 -> current.outputDevices.filterNot { it.id == "broche:phone_speaker" }
+                    else -> current.outputDevices
+                }
+                s.reduce(
+                    Event.DeckState(
+                        id = id,
+                        state = current.copy(
+                            volume = if (isSpeakerRelayToggle) current.volume else (wireVol ?: current.volume),
+                            muted = muted ?: current.muted,
+                            outputDevices = updatedOutputs,
+                        ),
+                    ),
+                )
+            } else {
+                s
+            }
+        }
+        remoteOps.trySend { node ->
+            try {
+                node.setPcAudio(id, wireVol, muted)
+            } catch (e: BrocheException) {
+                if (e is BrocheException.Denied) {
+                    val name = _state.value.nameOf(id).orEmpty()
+                    _messages.tryEmit(context.getString(R.string.remote_denied_title, name))
+                } else if (e !is BrocheException.Offline) {
+                    _messages.tryEmit(describe(e))
+                }
+            }
+        }
+    }
+
+    // ---- Phone storage (File Explorer on PC) ----
+
+    /** Turns phone storage access in File Explorer on or off for `pcId` (off by default). */
+    fun setStorageEnabled(pcId: String, enabled: Boolean) {
+        _state.update { it.withStorageEnabled(pcId, enabled) }
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            val currentNode = node ?: return@launch
+            runCatching { currentNode.setDeviceToggle(pcId, PhoneStorage.TOGGLE_NAME, enabled) }
+            notificationOps.trySend {
+                it.updatePower(powerLevel(), capabilities(_state.value.notificationAccess))
+            }
+        }
+    }
+
+    /** Every per-device permission of `pcId` with its value (read from the core's database). */
+    fun deviceToggles(pcId: String): List<io.github.robertcjla.broche.ffi.DeviceToggle> =
+        node?.let { runCatching { it.deviceToggles(pcId) }.getOrNull() }.orEmpty()
+
+    /** Turns one per-device permission of `pcId` on or off. */
+    fun setDeviceToggle(pcId: String, name: String, enabled: Boolean) {
+        // A local database write: done now, so the screen reads the new value right after.
+        node?.let { runCatching { it.setDeviceToggle(pcId, name, enabled) } }
+        if (name == PhoneStorage.TOGGLE_NAME) return setStorageEnabled(pcId, enabled)
+        notificationOps.trySend { it.updatePower(powerLevel(), capabilities(_state.value.notificationAccess)) }
+    }
+
+    /** The profile `pcId`'s permissions match, or null when they were changed one by one. */
+    fun permissionProfile(pcId: String): io.github.robertcjla.broche.ffi.PermissionProfile? =
+        node?.let { runCatching { it.permissionProfile(pcId) }.getOrNull() }
+
+    /** Sets every permission of `pcId` to `profile`. */
+    fun applyPermissionProfile(pcId: String, profile: io.github.robertcjla.broche.ffi.PermissionProfile) {
+        // Local database writes: done now, so the screen reads the new values right after.
+        val currentNode = node ?: return
+        runCatching { currentNode.applyPermissionProfile(pcId, profile) }
+        val storage = runCatching { currentNode.deviceToggles(pcId) }.getOrDefault(emptyList())
+            .any { it.name == PhoneStorage.TOGGLE_NAME && it.enabled }
+        _state.update { it.withStorageEnabled(pcId, storage) }
+        notificationOps.trySend { it.updatePower(powerLevel(), capabilities(_state.value.notificationAccess)) }
+    }
+
+    /** Chooses the video quality for this phone and the PC (high = 1080p and 60 fps). */
+    fun setVideoQuality(high: Boolean) {
+        io.github.robertcjla.broche.video.VideoPreferences.setHigh(context, high, System.currentTimeMillis())
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            val currentNode = node ?: return@launch
+            val at = runCatching { currentNode.setVideoQuality(high) }.getOrDefault(0L)
+            if (at > 0) io.github.robertcjla.broche.video.VideoPreferences.setHigh(context, high, at)
+        }
+    }
+
+    fun dismissStorageRequest() {
+        _state.update { it.copy(storageRequestedFrom = null) }
+    }
+
+    fun addSafFolder(treeUri: Uri) {
+        PhoneStorage.addSafFolder(context, treeUri)
+        refreshNotificationAccess()
+    }
+
+    fun removeSafFolder(name: String) {
+        PhoneStorage.removeSafFolder(context, name)
+        refreshNotificationAccess()
+    }
+
+    /** Lists files and folders in `path` on a paired PC (`storage.list`). */
+    fun listPcFiles(
+        deviceId: String,
+        path: String,
+        onResult: (List<RemoteStorageEntry>, String?) -> Unit,
+    ) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            var errorMessage: String? = if (node == null) context.getString(R.string.error_not_connected) else null
+            val entries = runCatching { node?.listRemoteStorage(deviceId, path).orEmpty() }
+                .onFailure { error ->
+                    errorMessage = if (error is BrocheException) describe(error) else context.getString(R.string.error_generic)
+                    _messages.tryEmit(errorMessage!!)
+                }
+                .getOrDefault(emptyList())
+            withContext(Dispatchers.Main) {
+                onResult(entries, errorMessage)
+            }
+        }
+    }
+
+    /** Downloads `remotePath` from a paired PC (`storage.read`) and saves it into Downloads. */
+    fun downloadPcFile(
+        deviceId: String,
+        remotePath: String,
+        fileName: String,
+        onSaved: (Uri?) -> Unit,
+    ) {
+        scope.launch(Dispatchers.IO) {
+            startJob?.join()
+            val currentNode = node
+            if (currentNode == null) {
+                withContext(Dispatchers.Main) { onSaved(null) }
+                return@launch
+            }
+            val cacheDir = java.io.File(context.cacheDir, "pc_downloads").apply { mkdirs() }
+            val safeName = fileName.replace(Regex("""[\\/:*?"<>|]"""), "_").ifBlank { "file" }
+            val tempFile = java.io.File(cacheDir, "${System.currentTimeMillis()}_$safeName")
+            val ok = runCatching {
+                currentNode.downloadRemoteStorage(deviceId, remotePath, tempFile.absolutePath)
+            }.getOrDefault(false)
+            val savedUri = if (ok && tempFile.exists()) {
+                ReceivedFiles.saveToDownloads(context, tempFile, safeName)
+            } else {
+                null
+            }
+            runCatching { tempFile.delete() }
+            withContext(Dispatchers.Main) {
+                onSaved(savedUri)
+            }
+        }
+    }
+
+    /** Asks an online relay peer to broadcast a Wake-on-LAN magic packet (`wake.relay`). */
+    fun wakeViaRelay(relayPeerId: String, mac: String, broadcast: String? = null) {
+        command { it.wakeViaRelay(relayPeerId, mac, broadcast) }
+    }
+
+    /** Reconnects to PCs that aren't connected and syncs connected ones. */
+    fun refresh() {
+        refreshNotificationAccess()
+        command { it.refresh() }
+    }
+
+    fun unpair(id: String) = command { it.unpair(id) }
+
+    /** Stops this phone ringing. */
+    fun stopRinging() {
+        ringer.stopRinging()
+        _state.update { it.copy(ringingFrom = null) }
+    }
+
+    /** Records whether `pcId` is currently typing on this phone without mirroring. */
+    fun setKeyboardFromPc(pcId: String, on: Boolean) {
+        _state.update {
+            it.copy(keyboardFromPc = if (on) it.keyboardFromPc + pcId else it.keyboardFromPc - pcId)
+        }
+    }
+
+    /** Stops remote keyboard typing from `pcId` and notifies the PC. */
+    fun stopKeyboardFromPc(pcId: String) {
+        _state.update { it.copy(keyboardFromPc = it.keyboardFromPc - pcId) }
+        val currentNode = node ?: return
+        scope.launch(Dispatchers.IO) {
+            runCatching { currentNode.mirrorStop(pcId, 0u) }
+        }
+    }
+
+    /** Runs a command on the node, turning errors into a message. */
+    private fun command(block: suspend (BrocheNode) -> Unit) {
+        scope.launch {
+            startJob?.join()
+            val node = node ?: return@launch
+            try {
+                block(node)
+            } catch (e: BrocheException) {
+                _messages.tryEmit(describe(e))
+            }
+        }
+    }
+
+    private fun describe(e: BrocheException): String = when (e) {
+        is BrocheException.Offline -> context.getString(R.string.error_not_connected)
+        is BrocheException.NotPaired -> context.getString(R.string.error_not_paired)
+        is BrocheException.Timeout -> context.getString(R.string.error_timed_out)
+        is BrocheException.Unsupported -> context.getString(R.string.error_unsupported)
+        is BrocheException.Denied -> context.getString(R.string.error_denied)
+        is BrocheException.NotFound -> context.getString(R.string.error_not_found)
+        is BrocheException.QueueFull -> e.reason.ifBlank { context.getString(R.string.send_queue_full) }
+        else -> context.getString(R.string.error_generic)
+    }
+
+    enum class RemoteAccess { Allowed, Denied, Offline, Unsupported }
+
+    private companion object {
+        const val TAG = "Broche"
+        /** Offered while notification access is granted (docs/protocol/capabilities.md). */
+        val NOTIFICATION_CAPABILITIES = listOf("notify.mirror", "notify.reply", "notify.live")
+        /** Sharing this phone's players, which also needs notification access. */
+        val MEDIA_CAPABILITIES = listOf("media.control")
+        /** Accepting the PC's clipboard, and sending this one when asked. */
+        val CLIPBOARD_CAPABILITIES = listOf("clip.write", "clip.share", "mirror.capture", "mirror.view")
+        /** With access to the phone's photos. */
+        val PHOTO_CAPABILITIES = listOf("photos.read")
+    }
+}

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+<title>Broche — dos ganchos entrelazados</title>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<rect width="128" height="128" rx="30" fill="#14213d"/>
+<g fill="none" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" transform="rotate(-45 64 64)">
+<path d="M31 30V74a22 22 0 0 0 44 0V46" stroke="#5b8def"/>
+<path d="M97 98V54a22 22 0 0 0-44 0V82" stroke="#9fe3ff"/>
+</g></svg>

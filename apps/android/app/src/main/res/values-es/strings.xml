@@ -1,0 +1,1298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <string name="app_name">Broche</string>
+
+    <!-- Pairing -->
+    <string name="pair_title">Vincular con tu PC</string>
+    <string name="pair_scan_hint">En tu PC, abre Broche. Apunta la cámara al código que muestra.</string>
+    <string name="pair_nearby_title">Vincular cerca</string>
+    <string name="pair_nearby_hint">En tu PC, abre Broche y deja abierta su pantalla de vinculación. Aparecerá aquí.</string>
+    <string name="pair_looking">Buscando PCs…</string>
+    <string name="pair_joining">Vinculando…</string>
+    <string name="pair_connecting">Conectando con %1$s…</string>
+    <string name="pair_waiting">Esperando a %1$s…</string>
+    <string name="pair_check_code">Comprueba el código</string>
+    <string name="pair_compare_hint">Asegúrate de que %1$s muestre el mismo código. Así nadie más puede vincularse en medio.</string>
+    <string name="pair_done_title">Vinculado</string>
+    <string name="pair_done">%1$s está vinculado con este teléfono.</string>
+    <string name="pair_failed_title">No se pudo vincular</string>
+    <string name="pair_failed_rejected">Los códigos no coincidían, así que no se vinculó nada.</string>
+    <string name="pair_failed_declined">La vinculación se rechazó en uno de los dispositivos.</string>
+    <string name="pair_failed_expired">El código caducó. Muestra uno nuevo en tu PC.</string>
+    <string name="pair_failed_unreachable">No se pudo contactar con el PC. Asegúrate de que ambos estén en la misma red.</string>
+    <string name="pair_failed_other">Ese no es un código de vinculación de Broche, o algo salió mal.</string>
+    <string name="your_pc">tu PC</string>
+    <string name="camera_permission_needed">Broche necesita la cámara para escanear el código de vinculación. No se graba nada.</string>
+
+    <!-- Home -->
+    <string name="home_title">Inicio</string>
+    <string name="link_online">Conectado</string>
+    <string name="link_online_rtt">Conectado · %1$d ms</string>
+    <string name="link_usb">Por USB</string>
+    <string name="link_usb_rtt">Por USB · %1$d ms</string>
+    <string name="link_away">Conectado desde fuera de casa</string>
+    <string name="link_connecting">Conectando…</string>
+    <string name="link_offline_seen">Sin conexión · visto %1$s</string>
+    <string name="link_offline_now">Sin conexión · visto hace un momento</string>
+    <string name="link_never">Aún no conectado</string>
+    <string name="battery_level">%1$d%%</string>
+    <string name="battery_charging">%1$d%% · cargando</string>
+    <string name="ringing_title">%1$s está haciendo sonar tu teléfono</string>
+    <string name="ringing_title_unknown">Tu PC está haciendo sonar tu teléfono</string>
+    <string name="connected">Conectado</string>
+    <string name="not_connected">No conectado</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_appearance">Apariencia</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_language">Idioma</string>
+    <string name="language_system">Sistema</string>
+    <string name="settings_mode">Modo</string>
+    <string name="settings_devices">PCs</string>
+    <string name="settings_about">Acerca de</string>
+    <string name="settings_notifications">Notificaciones</string>
+    <string name="notifications_title">Mostrar notificaciones en tu PC</string>
+    <string name="notifications_on">Activado. Las notificaciones aparecen en tus PCs vinculados, donde puedes responderlas y descartarlas.</string>
+    <string name="notifications_off">Broche necesita acceso a las notificaciones para mostrar las de este teléfono en tu PC.</string>
+    <string name="notifications_restricted">¿El interruptor está en gris? Abre Información de la app, toca ⋮, elige “Permitir ajustes restringidos” y vuelve a intentarlo.</string>
+    <string name="action_allow">Permitir</string>
+    <string name="clip_share_label">Enviar al PC</string>
+    <string name="channel_transfers">Transferencias de archivos</string>
+    <string name="channel_received">Archivos recibidos</string>
+    <string name="channel_pc_media">Multimedia en tu PC</string>
+    <string name="media_on">%1$s en %2$s</string>
+    <string name="media_play">Reproducir</string>
+    <string name="media_pause">Pausar</string>
+    <string name="media_next">Siguiente</string>
+    <string name="media_previous">Anterior</string>
+    <string name="action_send_files">Enviar archivos</string>
+    <string name="action_send_folder">Enviar carpeta</string>
+    <string name="input_service_label">Broche: control desde tu PC</string>
+    <string name="input_service_description">Permite que el ratón y el teclado de tu PC toquen, deslicen y escriban en este teléfono mientras compartes su pantalla con un PC vinculado. No lee nada más.</string>
+    <string name="settings_control">Control desde tu PC</string>
+    <string name="control_title">Usar el ratón y el teclado de tu PC</string>
+    <string name="control_on">Activado: mientras tu pantalla se muestra en tu PC, puedes tocar, deslizar y escribir desde allí.</string>
+    <string name="control_off">Toca, desliza y escribe desde tu PC mientras muestra esta pantalla. Activa Broche en Accesibilidad.</string>
+    <string name="dnd_access_title">No molestar y modo silencio</string>
+    <string name="dnd_access_on">Activado: tu PC puede activar o desactivar No molestar y poner el timbre en silencio.</string>
+    <string name="dnd_access_off">Permite que tu PC active o desactive No molestar y ponga el timbre en silencio.</string>
+    <string name="local_network_title">Llegar a tu PC en esta red</string>
+    <string name="local_network_text">Android pregunta antes de que una app hable con dispositivos de tu red. Broche lo necesita para llegar a tu PC.</string>
+    <string name="channel_elevated">Configuración de la depuración inalámbrica</string>
+    <string name="elevated_title">Toques y teclas reales (Depuración inalámbrica)</string>
+    <string name="elevated_not_set_up">Toque en tiempo real y todas las teclas desde tu PC, apps del teléfono en ventanas propias y, si lo permites, el control de las llamadas. Usa la Depuración inalámbrica de Android.</string>
+    <string name="elevated_waiting">Esperando la Depuración inalámbrica. Actívala en Opciones de desarrollador.</string>
+    <string name="elevated_starting">Iniciando…</string>
+    <string name="elevated_running">Activado: el ratón y el teclado de tu PC funcionan como una pantalla táctil y un teclado reales.</string>
+    <string name="elevated_failed">No se pudo iniciar. Comprueba que la Depuración inalámbrica esté activada y vuelve a intentarlo.</string>
+    <string name="elevated_not_paired">El teléfono olvidó la vinculación de Broche. Configúralo de nuevo.</string>
+    <string name="elevated_set_up">Configurar</string>
+    <string name="elevated_use_root">Usar root</string>
+    <string name="elevated_root_hint">Este teléfono tiene root, así que el modo avanzado puede iniciarse mediante root: sin vinculación, y vuelve solo tras reiniciar o al salir del Wi-Fi. Obtiene los mismos permisos que con la Depuración inalámbrica.</string>
+    <string name="elevated_running_root">Activado mediante root: el ratón y el teclado de tu PC funcionan como una pantalla táctil y un teclado reales.</string>
+    <string name="elevated_root_failed">No se permitió root, o tu gestor de root no puede iniciar el ayudante de Broche como usuario shell. Puedes configurarlo con la Depuración inalámbrica.</string>
+    <string name="elevated_turn_off">Desactivar</string>
+    <string name="elevated_try_again">Reintentar</string>
+    <string name="elevated_steps_title">Configurar la Depuración inalámbrica</string>
+    <string name="elevated_calls_title">Controlar llamadas desde el PC</string>
+    <string name="elevated_calls_body">Silenciar, altavoz, espera y teclado en la llamada en curso. Desactivado hasta que lo actives.</string>
+    <string name="elevated_sensitive_title">Notificaciones sensibles en el PC</string>
+    <string name="elevated_sensitive_body">Las notificaciones que Android oculta por ser sensibles, como los códigos de un solo uso de tu banco, también llegan a tu PC. Cualquiera que use tu PC puede verlas.</string>
+    <string name="elevated_steps">El ratón y el teclado de tu PC funcionan como toques y teclas reales, y las apps del teléfono pueden abrirse en ventanas propias en tu PC.\n\n1. Activa las Opciones de desarrollador: en Ajustes › Acerca del teléfono, toca 7 veces Número de compilación.\n2. En Opciones de desarrollador, activa la Depuración inalámbrica (por Wi-Fi), ábrela y toca Vincular dispositivo con código de vinculación.\n3. Escribe el código de 6 dígitos en la notificación de Broche, sin cerrar el código.</string>
+    <string name="elevated_open_developer">Abrir Opciones de desarrollador</string>
+    <string name="elevated_pair_title">Vincular Broche con la Depuración inalámbrica</string>
+    <string name="elevated_pair_text">En la Depuración inalámbrica, toca Vincular dispositivo con código de vinculación y escribe aquí el código.</string>
+    <string name="elevated_pair_action">Introducir código</string>
+    <string name="elevated_pair_hint">Código de vinculación de 6 dígitos</string>
+    <string name="elevated_pairing">Vinculando…</string>
+    <string name="elevated_no_dialog">No se muestra el código de vinculación. En la Depuración inalámbrica, toca Vincular dispositivo con código de vinculación y escríbelo aquí.</string>
+    <string name="elevated_wrong_code">Ese código no funcionó. Revísalo y escríbelo de nuevo.</string>
+    <string name="channel_mirroring">Compartir pantalla</string>
+    <string name="channel_mirror_requests">Solicitudes para compartir pantalla</string>
+    <string name="mirror_request_title">%1$s quiere ver tu pantalla</string>
+    <string name="mirror_request_text">Toca para compartirla. Puedes detenerlo cuando quieras.</string>
+    <string name="mirror_sharing">Compartiendo tu pantalla con %1$s</string>
+    <string name="action_stop">Detener</string>
+    <plurals name="app_windows_title">
+        <item quantity="one">%1$d app está abierta en una ventana en un PC</item>
+        <item quantity="many">%1$d apps están abiertas en ventanas en un PC</item>
+        <item quantity="other">%1$d apps están abiertas en ventanas en un PC</item>
+    </plurals>
+    <string name="app_windows_text">Se muestran en %1$s. Se ejecutan aquí, junto a lo que hay en tu pantalla.</string>
+    <string name="action_close_all">Cerrar todas</string>
+    <string name="settings_calls_and_contacts">Llamadas, contactos y mensajes</string>
+    <string name="sms_title">Mensajes desde tu PC</string>
+    <string name="sms_on">Activado. Las conversaciones aparecen en tu PC, donde puedes leer y enviar mensajes.</string>
+    <string name="sms_off">Lee y envía mensajes desde tu PC. Requiere acceso a mensajes y contactos.</string>
+    <string name="calls_title">Llamadas en tu PC</string>
+    <string name="calls_on">Activado. Tu PC muestra las llamadas entrantes y recientes, y puede iniciar o contestar llamadas.</string>
+    <string name="calls_off">Mira quién llama e inicia o contesta llamadas desde tu PC. El audio se queda en el teléfono, salvo que también lo emparejes con el PC por Bluetooth (Audio de llamadas, más abajo). Requiere acceso a llamadas, historial de llamadas y contactos.</string>
+    <string name="contacts_title">Contactos en tu PC</string>
+    <string name="contacts_on">Activado. Tus contactos están disponibles en Llamadas y Mensajes en tu PC.</string>
+    <string name="contacts_off">Busca contactos y llama o escribe desde tu PC. Requiere acceso a los contactos.</string>
+    <string name="settings_photos">Fotos y vídeos</string>
+    <string name="photos_title">Fotos y vídeos en tu PC</string>
+    <string name="photos_on">Activado. Tus fotos, capturas y vídeos están disponibles en tu PC.</string>
+    <string name="photos_partial">Solo se comparten algunas fotos. Permite todas para explorar toda tu galería en tu PC.</string>
+    <string name="photos_off">Explora fotos y vídeos en tu PC y recibe al instante las capturas nuevas. Requiere acceso a fotos y vídeos.</string>
+    <string name="action_select_photos">Permitir todas</string>
+    <string name="transfer_too_many">Esa carpeta tiene demasiados archivos para enviarla de una vez.</string>
+    <string name="transfers_title">Transferencias</string>
+    <string name="transfer_sending">Enviando a %1$s</string>
+    <string name="transfer_receiving">Recibiendo de %1$s</string>
+    <string name="transfer_waiting">Esperando a %1$s</string>
+    <string name="transfer_pause">Pausar</string>
+    <string name="transfer_resume">Reanudar</string>
+    <string name="transfer_paused_progress">En pausa · %1$s / %2$s</string>
+    <string name="transfer_received_from">De %1$s · en Download/Broche</string>
+    <string name="transfer_sent_to">Enviado a %1$s</string>
+    <string name="transfer_cancelled">Cancelado</string>
+    <string name="transfer_denied">%1$s no acepta archivos de este teléfono.</string>
+    <string name="transfer_unreachable">No se pudo contactar con %1$s.</string>
+    <string name="transfer_no_space">No hay espacio suficiente.</string>
+    <string name="transfer_failed_integrity">El archivo no superó la comprobación de integridad; se conserva el archivo parcial para reanudar</string>
+    <string name="transfer_failed">La transferencia no se completó.</string>
+    <string name="transfer_nothing">No se pueden abrir esos archivos.</string>
+    <string name="transfer_off_for">Los archivos están desactivados para %1$s.</string>
+    <string name="transfer_pick_pc">¿A qué PC enviar?</string>
+    <string name="clip_tile_label">Enviar portapapeles</string>
+    <string name="action_send_clipboard">Copiar al PC</string>
+    <string name="clip_sent_to">Enviado a %1$s</string>
+    <string name="clip_no_pc">Ningún PC está conectado ahora.</string>
+    <string name="clip_off_for">El portapapeles está desactivado para %1$s.</string>
+    <string name="clip_too_large">Es demasiado texto para enviarlo de una vez.</string>
+    <string name="clip_private">Lo que copiaste está marcado como privado por su app, así que no se envió.</string>
+    <string name="clip_empty">No hay texto ni imagen en el portapapeles.</string>
+    <string name="clip_image_too_large">Esa imagen es demasiado grande para enviarla.</string>
+    <string name="clip_image_unreadable">No se puede leer esa imagen.</string>
+    <string name="clip_image_unsupported">Actualiza Broche en %1$s para enviarle imágenes.</string>
+    <string name="clip_nothing_shared">No hay texto que enviar.</string>
+    <string name="clipboard_history_title">Historial del portapapeles</string>
+    <string name="clipboard_history_subtitle">Tus últimos 50 fragmentos con tus PCs, guardados cifrados en este teléfono.</string>
+    <string name="clipboard_history_just_now">hace un momento</string>
+    <string name="clipboard_history_empty">Aún no hay nada. Los fragmentos compartidos con tus PCs aparecen aquí.</string>
+    <string name="clipboard_history_search">Buscar en el historial del portapapeles</string>
+    <string name="clipboard_history_no_match">Nada coincide con “%1$s”.</string>
+    <string name="clipboard_history_from">De %1$s</string>
+    <string name="clipboard_history_sent_to">Enviado a %1$s</string>
+    <string name="clipboard_history_image">Imagen</string>
+    <string name="clipboard_history_copy">Copiar</string>
+    <string name="clipboard_history_copied">Copiado al portapapeles</string>
+    <string name="clipboard_history_pin">Fijar</string>
+    <string name="clipboard_history_unpin">Desfijar</string>
+    <string name="clipboard_history_delete">Eliminar</string>
+    <string name="clipboard_history_clear">Borrar historial</string>
+    <string name="clipboard_history_done">Listo</string>
+    <string name="settings_clipboard_title">Portapapeles</string>
+    <string name="settings_auto_clipboard">Enviar al PC lo que copio</string>
+    <string name="settings_auto_clipboard_hint">Lo que copias en este teléfono llega solo a tus PC conectados (necesita el modo avanzado). Si lo apagas, usa Copiar al PC.</string>
+    <string name="settings_clipboard_suggestions">Sugerir acciones para el texto copiado</string>
+    <string name="settings_clipboard_suggestions_hint">Sugiere acciones para el texto de tu PC: abrir enlaces, mapas, llamadas, paquetes y correo.</string>
+    <string name="clip_received_from">Copiado desde %1$s</string>
+    <string name="clip_action_open">Abrir</string>
+    <string name="clip_action_maps">Abrir en Maps</string>
+    <string name="clip_action_call">Llamar</string>
+    <string name="clip_action_track">Rastrear</string>
+    <string name="clip_action_email">Correo</string>
+    <string name="background_title">Seguir disponible en segundo plano</string>
+    <string name="background_text">Android está pausando Broche para ahorrar batería, por lo que tu PC no puede contactarlo. Permite que se ejecute en segundo plano.</string>
+    <string name="background_on">Puede mantenerse conectado en segundo plano</string>
+    <string name="settings_background_title">Segundo plano y batería</string>
+    <string name="battery_open_oem_settings">Ajustes de batería</string>
+    <string name="battery_guide_samsung">En Samsung: abre Información de la app › Batería › selecciona Sin restricciones, y en Cuidado del dispositivo › Batería › Límites de uso en segundo plano asegúrate de que Broche nunca se suspenda.</string>
+    <string name="battery_guide_xiaomi">En Xiaomi / HyperOS / MIUI: activa Inicio automático para Broche y, en Información de la app › Ahorro de batería, selecciona Sin restricciones.</string>
+    <string name="battery_guide_oneplus">En OnePlus / OxygenOS: abre Información de la app › Uso de batería › activa Permitir actividad en segundo plano y Permitir inicio automático.</string>
+    <string name="battery_guide_oppo_realme">En Oppo / Realme: abre Información de la app › Uso de batería › activa Permitir actividad en segundo plano y Permitir inicio automático.</string>
+    <string name="battery_guide_vivo">En Vivo / Funtouch / OriginOS: abre Información de la app › Batería › selecciona Sin restricciones (alto consumo en segundo plano) y permite el Inicio automático.</string>
+    <string name="battery_guide_huawei">En Huawei / Honor: abre Inicio de apps (Gestor del teléfono) › desactiva Gestionar automáticamente para Broche y mantén activados Inicio automático, Inicio secundario y Ejecutar en segundo plano.</string>
+    <string name="battery_guide_pixel">En Pixel: abre Información de la app › Uso de batería de la app › toca Permitir uso en segundo plano y selecciona Sin restricciones.</string>
+    <string name="action_manage">Gestionar</string>
+    <string name="action_app_info">Información de la app</string>
+    <string name="mode_system">Sistema</string>
+    <string name="mode_light">Claro</string>
+    <string name="mode_dark">Oscuro</string>
+    <string name="about_version">Broche %1$s</string>
+    <string name="unpair_title">¿Desvincular %1$s?</string>
+    <string name="unpair_text">Ambos dispositivos se olvidan el uno del otro. Puedes vincularlos de nuevo cuando quieras.</string>
+    <string name="core_failed">Broche no pudo iniciarse: %1$s</string>
+
+    <!-- Actions -->
+    <string name="action_pair">Vincular</string>
+    <string name="action_pair_nearby">Vincular cerca en su lugar</string>
+    <string name="action_scan_instead">Escanear un código en su lugar</string>
+    <string name="action_codes_match">Los códigos coinciden</string>
+    <string name="action_codes_differ">No coinciden</string>
+    <string name="action_try_again">Reintentar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_allow_camera">Permitir cámara</string>
+    <string name="action_ring_pc">Hacer sonar el PC</string>
+    <string name="action_stop_ringing">Dejar de sonar</string>
+    <string name="action_unpair">Desvincular</string>
+    <string name="action_pair_new">Vincular otro PC</string>
+    <string name="action_refresh">Actualizar</string>
+    <string name="action_wake_pc">Despertar</string>
+    <string name="wake_waking">Despertando %1$s…</string>
+    <string name="wake_timeout_title">%1$s aún no se ha despertado</string>
+    <string name="wake_timeout_text">Comprueba que:\n• Wake-on-LAN esté activado en la BIOS/UEFI y en los ajustes de red del PC.\n• %1$s esté conectado por Ethernet si estaba apagado (despertar por Wi-Fi rara vez funciona desde el apagado).\n• Este teléfono esté en la misma red que %1$s.</string>
+    <string name="wake_not_ready">Conéctate una vez a %1$s para que este teléfono aprenda su dirección de red.</string>
+    <string name="pc_locked">%1$s está bloqueado.</string>
+    <string name="pc_sleeping">%1$s se está suspendiendo.</string>
+    <string name="pc_actions_off">Bloquear y suspender están desactivados para este teléfono en %1$s.</string>
+    <string name="channel_links">Enlaces desde tu PC</string>
+    <string name="link_from">Enlace de %1$s</string>
+    <string name="link_opened_on">Abierto en %1$s</string>
+    <string name="link_pick_pc">¿Abrir en qué PC?</string>
+    <string name="channel_pc_tasks">Tareas en tu PC</string>
+    <string name="channel_pc_tasks_running">Tareas en ejecución en tu PC</string>
+    <string name="task_running_on">En ejecución en %1$s</string>
+
+    <!-- Notifications -->
+    <string name="channel_connection">Conexión</string>
+    <string name="channel_ringing">Encontrar mi teléfono</string>
+    <string name="notification_connected_to">Conectado a %1$s</string>
+    <plurals name="notification_connected_pcs">
+        <item quantity="one">Conectado a %1$d PC</item>
+        <item quantity="many">Conectado a %1$d PCs</item>
+        <item quantity="other">Conectado a %1$d PCs</item>
+    </plurals>
+    <string name="notification_waiting">Esperando a tu PC</string>
+    <string name="notification_not_paired">Aún no vinculado con un PC</string>
+    <plurals name="transfer_files">
+        <item quantity="one">%1$d archivo</item>
+        <item quantity="many">%1$d archivos</item>
+        <item quantity="other">%1$d archivos</item>
+    </plurals>
+    <plurals name="transfer_items">
+        <item quantity="one">%1$d elemento</item>
+        <item quantity="many">%1$d elementos</item>
+        <item quantity="other">%1$d elementos</item>
+    </plurals>
+
+    <!-- Remote input (touchpad, air mouse, keyboard, voice typing & presentation) -->
+    <string name="action_remote_pc">Controlar PC</string>
+    <string name="action_back">Atrás</string>
+    <string name="settings_remote">Controla tu PC</string>
+    <string name="settings_touchpad_sensitivity">Velocidad del panel táctil</string>
+    <string name="settings_touchpad_sensitivity_value">%1$.1f×</string>
+    <string name="remote_mode_touchpad">Panel táctil</string>
+    <string name="remote_mode_air">Ratón aéreo</string>
+    <string name="remote_mode_presentation">Presentación</string>
+    <string name="remote_touchpad_hint">Arrastra para mover · Toca para hacer clic · Dos dedos para clic derecho o desplazar · Toca dos veces y mantén para arrastrar</string>
+    <string name="remote_air_hold">Mantén pulsado para apuntar a %1$s</string>
+    <string name="remote_air_active">Moviendo en %1$s · inclina el teléfono o toca para hacer clic</string>
+    <string name="remote_air_hint">Mantén el panel y inclina el teléfono para mover el puntero · Toca el panel para hacer clic · Suelta para detener</string>
+    <string name="remote_air_no_gyro_title">Este teléfono no tiene giroscopio</string>
+    <string name="remote_air_no_gyro_text">El ratón aéreo usa un giroscopio para seguir cómo inclinas el teléfono. Usa el modo Panel táctil.</string>
+    <string name="remote_left_click">Izquierdo</string>
+    <string name="remote_right_click">Derecho</string>
+    <string name="remote_middle_click">Central</string>
+    <string name="remote_keyboard">Teclado</string>
+    <string name="remote_type_placeholder">Escribe en %1$s…</string>
+    <string name="remote_dictate">Dictar</string>
+    <string name="remote_dictate_stop">Detener</string>
+    <string name="remote_dictate_hint">Toca o mantén Dictar para hablar en %1$s</string>
+    <string name="remote_dictate_listening">Escuchando para %1$s…</string>
+    <string name="remote_dictate_typing">Escribiendo en %1$s…</string>
+    <string name="remote_dictate_typed">Escrito en %1$s: “%2$s”</string>
+    <string name="remote_dictate_no_recognizer">Este teléfono no tiene reconocimiento de voz instalado.</string>
+    <string name="remote_dictate_no_speech">No se oyó nada. Toca o mantén Dictar para reintentar.</string>
+    <string name="remote_dictate_error">El reconocimiento de voz no pudo terminar. Toca o mantén Dictar para reintentar.</string>
+    <string name="remote_dictate_permission_needed">Broche necesita acceso al micrófono para dictar en %1$s.</string>
+    <string name="remote_denied_title">Permitir el control en %1$s</string>
+    <string name="remote_denied_text">En %1$s, permite el control desde este teléfono en el aviso de Broche o en Ajustes › Dispositivo › Permisos detallados.</string>
+    <string name="remote_offline_text">%1$s no está conectado ahora.</string>
+    <string name="remote_unsupported_text">Actualiza Broche en %1$s para controlarlo desde este teléfono.</string>
+    <string name="remote_slide_next">Diapositiva siguiente</string>
+    <string name="remote_slide_prev">Anterior</string>
+    <string name="remote_slide_start">Iniciar presentación</string>
+    <string name="remote_slide_stop">Terminar presentación</string>
+    <string name="remote_slide_black">Pantalla en negro</string>
+    <string name="remote_laser_hold">Mantén pulsado para el puntero láser</string>
+    <string name="remote_laser_active_tilt">Láser en %1$s · inclina el teléfono</string>
+    <string name="remote_laser_active_touch">Láser en %1$s · arrastra aquí</string>
+    <string name="remote_laser_touch">Dedo</string>
+    <string name="remote_laser_tilt">Inclinar</string>
+    <string name="remote_volume_hint">Los botones de volumen también cambian de diapositiva mientras esta pantalla esté abierta.</string>
+    <string name="remote_mode_screen">Pantalla</string>
+    <string name="pc_mirror_connecting">Conectando con %1$s…</string>
+    <string name="pc_mirror_fullscreen">Pantalla completa</string>
+    <string name="pc_mirror_exit_fullscreen">Salir de pantalla completa</string>
+    <string name="pc_mirror_right_click">Clic derecho</string>
+    <string name="pc_mirror_task_view">Vista de tareas</string>
+    <string name="pc_mirror_keyboard">Teclado</string>
+    <string name="pc_mirror_hide_keyboard">Ocultar teclas</string>
+    <string name="pc_mirror_send_text">Enviar</string>
+    <string name="pc_mirror_backspace">Retroceso</string>
+    <string name="pc_mirror_quality_720p">720p</string>
+    <string name="pc_mirror_quality_1080p">1080p</string>
+    <string name="pc_mirror_quality_desc">Calidad de transmisión: %1$s</string>
+    <string name="pc_mirror_viewport_desc">Pantalla de %1$s</string>
+
+
+    <!-- Deck (macro pad to PC) -->
+    <string name="action_deck_pc">Atajos del PC</string>
+    <string name="deck_fullscreen">Pantalla completa</string>
+    <string name="deck_exit_fullscreen">Salir de pantalla completa</string>
+    <string name="deck_playing">Reproduciendo</string>
+    <string name="deck_paused">En pausa</string>
+    <string name="deck_muted">Silenciado</string>
+    <string name="deck_live">En vivo</string>
+    <string name="deck_volume_percent">%1$d%%</string>
+    <string name="deck_empty_page">Aún no hay teclas en esta página. Añade teclas en Broche en %1$s.</string>
+    <string name="deck_commands_denied_title">Permitir comandos en %1$s</string>
+    <string name="deck_commands_denied_text">Para ejecutar comandos desde este teléfono, activa «Dejar que ejecute comandos en este PC» en Broche › Ajustes › Dispositivo › Permisos detallados en %1$s.</string>
+    <string name="deck_hint">Añade tus propios atajos en Broche en %1$s: Ajustes › Preferencias.</string>
+    <string name="pc_audio_volume">Volumen</string>
+    <string name="pc_audio_mute">Silenciar</string>
+    <string name="pc_audio_unmute">Quitar silencio</string>
+    <string name="pc_audio_muted">Silenciado</string>
+    <string name="pc_audio_output">Salida: %1$s</string>
+    <string name="pc_audio_outputs_title">Salidas de audio en %1$s</string>
+    <string name="pc_audio_default_badge">Predeterminada</string>
+    <string name="pc_audio_outputs_hint">Dispositivos de reproducción activos en %1$s.</string>
+    <string name="pc_audio_use_phone_speaker">Usar el teléfono como altavoz</string>
+    <string name="pc_audio_use_phone_speaker_sub">Reproducir el audio del PC en este teléfono</string>
+    <string name="pc_audio_use_phone_speaker_on">Transmitiendo el audio del PC a este teléfono</string>
+
+    <!-- Phone storage in File Explorer -->
+    <string name="storage_all_files_title">Acceso a todos los archivos</string>
+    <string name="storage_all_files_on">Activado. Los PCs que permitas pueden explorar, abrir y copiar los archivos de este teléfono desde Broche.</string>
+    <string name="storage_all_files_off">Explora las carpetas de este teléfono desde Broche en tu PC. Requiere acceso a todos los archivos, o elige carpetas concretas abajo.</string>
+    <string name="storage_saf_title">Solo carpetas seleccionadas</string>
+    <string name="storage_saf_hint">Comparte solo las carpetas que elijas.</string>
+    <string name="storage_add_folder">Añadir carpeta</string>
+    <string name="storage_remove_folder">Quitar</string>
+    <string name="storage_request_title">%1$s quiere explorar el almacenamiento de este teléfono</string>
+    <string name="storage_request_text">¿Permitir que %1$s explore tu almacenamiento compartido (o las carpetas seleccionadas) desde Broche?</string>
+    <string name="action_not_now">Ahora no</string>
+
+    <!-- Phone as webcam to PC -->
+    <string name="action_webcam_pc">Webcam</string>
+    <string name="channel_webcam">Webcam</string>
+    <string name="channel_webcam_requests">Solicitudes de webcam</string>
+    <string name="webcam_notification_streaming">Transmitiendo la cámara a %1$s</string>
+    <string name="webcam_notification_detail">%1$d × %2$d · cámara %3$s</string>
+    <string name="webcam_request_title">%1$s quiere usar tu cámara</string>
+    <string name="webcam_request_text">Toca para abrir los controles de la webcam e iniciar la transmisión.</string>
+    <string name="webcam_permission_title">Permitir acceso a la cámara</string>
+    <string name="webcam_permission_text">Broche usa la cámara solo mientras la transmites a %1$s, donde se ve en Broche.</string>
+    <string name="webcam_allow_camera">Permitir cámara</string>
+    <string name="webcam_status_connecting">Conectando la cámara con %1$s…</string>
+    <string name="webcam_status_ready">Listo para transmitir a %1$s</string>
+    <string name="webcam_start">Iniciar webcam</string>
+    <string name="webcam_stop">Detener webcam</string>
+    <string name="webcam_camera_back">Trasera</string>
+    <string name="webcam_camera_front">Frontal</string>
+    <string name="webcam_switch_camera">Cambiar de cámara</string>
+    <string name="webcam_torch_on">Linterna encendida</string>
+    <string name="webcam_torch_off">Linterna apagada</string>
+    <string name="webcam_zoom_label">Zoom %1$.1f×</string>
+    <string name="webcam_denied_text">La webcam está desactivada para este teléfono en %1$s.</string>
+    <string name="webcam_offline_hint">Conecta %1$s a la misma red para empezar a transmitir tu cámara.</string>
+
+    <!-- Timeline -->
+    <string name="timeline_title">Historial</string>
+    <string name="timeline_subtitle">Archivos, fragmentos, enlaces, fotos y sesiones compartidos con tus PCs.</string>
+    <string name="timeline_search">Buscar en el historial</string>
+    <string name="timeline_empty">Aún no hay nada en tu historial.</string>
+    <string name="timeline_no_match">Nada coincide con “%1$s”.</string>
+    <string name="timeline_filter_all">Todo</string>
+    <string name="timeline_filter_files">Archivos</string>
+    <string name="timeline_filter_clips">Fragmentos</string>
+    <string name="timeline_filter_links">Enlaces</string>
+    <string name="timeline_filter_photos">Fotos</string>
+    <string name="timeline_filter_sessions">Sesiones</string>
+    <string name="timeline_action_open">Abrir</string>
+    <string name="timeline_action_folder">Mostrar en la carpeta</string>
+    <string name="timeline_action_copy">Copiar</string>
+    <string name="timeline_action_send_again">Enviar de nuevo</string>
+    <string name="timeline_action_remove">Quitar</string>
+    <string name="timeline_action_clear_all">Borrar todo</string>
+    <string name="timeline_action_load_more">Cargar más</string>
+    <string name="timeline_t_files">Archivos</string>
+    <string name="timeline_t_text_clip">Texto copiado</string>
+    <string name="timeline_t_image_clip">Imagen copiada</string>
+    <string name="timeline_t_map_location">Ubicación en el mapa</string>
+    <string name="timeline_t_handoff_document">Documento compartido</string>
+    <string name="timeline_t_phone_webcam">Webcam del teléfono</string>
+    <string name="timeline_t_copied_text">Texto copiado: %1$s</string>
+    <string name="timeline_t_copied_file">Archivo copiado: %1$s</string>
+    <string name="timeline_t_link">Enlace · %1$s</string>
+    <string name="timeline_t_on_map">%1$s en el mapa</string>
+    <string name="timeline_t_more">%1$s (y %2$d más)</string>
+    <string name="timeline_today">Hoy</string>
+    <string name="timeline_yesterday">Ayer</string>
+    <string name="timeline_retention_30d">30 d</string>
+    <string name="timeline_retention_90d">90 d</string>
+    <string name="timeline_retention_1y">1 a</string>
+    <string name="timeline_retention_all">Todo</string>
+
+    <!-- Data & storage -->
+    <string name="settings_data_storage_title">Datos y almacenamiento</string>
+    <string name="data_action_clear">Borrar</string>
+    <string name="data_notifications_title">Historial de notificaciones</string>
+    <string name="data_notifications_subtitle">Reflejadas en vivo en los PCs vinculados · no se guardan en este teléfono (los PCs conservan las notificaciones descartadas hasta 24 horas / 300 elementos)</string>
+    <string name="data_clipboard_title">Historial del portapapeles</string>
+    <string name="data_clipboard_subtitle">Cifrado en el dispositivo (sin contraseñas ni códigos de un solo uso) · se conserva 7 días, hasta 50 fragmentos / 128 MB</string>
+    <plurals name="data_clipboard_count">
+        <item quantity="one">%1$d fragmento guardado</item>
+        <item quantity="many">%1$d fragmentos guardados</item>
+        <item quantity="other">%1$d fragmentos guardados</item>
+    </plurals>
+    <string name="data_timeline_title">Historial</string>
+    <string name="data_timeline_subtitle">Archivos, fragmentos, enlaces, fotos y sesiones · hasta 5.000 elementos</string>
+    <string name="data_messages_title">Caché de mensajes</string>
+    <string name="data_messages_subtitle">Los SMS y las notificaciones de chat se leen en vivo desde Android; los archivos MMS temporales se conservan hasta 5 minutos (los PCs guardan en caché los chats durante 90 días)</string>
+    <string name="data_photos_title">Miniaturas de fotos y caché de la cámara</string>
+    <string name="data_photos_subtitle">Las fotos se leen directamente de MediaStore cuando hace falta; las capturas temporales de Continuity Camera se conservan hasta 24 horas</string>
+    <string name="data_received_files_title">Historial de archivos recibidos</string>
+    <string name="data_received_files_subtitle">Registro de transferencias guardado con el Historial (los archivos guardados en Descargas nunca se eliminan)</string>
+    <string name="data_clear_everything_hint">Elimina el Historial, el historial del portapapeles, los registros de transferencias y las cachés. Se conservan los PC vinculados y los ajustes.</string>
+    <string name="data_clear_everything_button">Borrar todo…</string>
+    <string name="data_clear_everything_dialog_title">¿Borrar todos los datos locales?</string>
+    <string name="data_clear_everything_dialog_body">Elimina el Historial, el historial del portapapeles, los registros de archivos recibidos y las cachés de este teléfono. Se conservan los PC vinculados y los ajustes.</string>
+    <string name="data_clear_everything_confirm">Borrar todo</string>
+    <string name="data_cleared_everything_toast">Se borraron todos los datos locales de este teléfono.</string>
+
+    <!-- LocalSend -->
+    <string name="settings_localsend_title">LocalSend</string>
+    <string name="settings_localsend_subtitle">Envía y recibe archivos con dispositivos LocalSend cercanos. Desactivado por defecto. Los archivos entrantes siempre preguntan antes.</string>
+    <string name="localsend_card_title">LocalSend cercano</string>
+    <string name="localsend_card_empty">Aún no se encontraron dispositivos LocalSend en esta red Wi-Fi.</string>
+    <string name="localsend_nearby_device">Dispositivo cercano</string>
+    <string name="action_accept">Aceptar</string>
+    <string name="action_decline">Rechazar</string>
+    <string name="action_dismiss">Descartar</string>
+
+    <!-- Continuity Camera -->
+    <string name="channel_camera_requests">Solicitudes de captura con la cámara</string>
+    <string name="continuity_camera_request_scan_title">%1$s quiere escanear un documento</string>
+    <string name="continuity_camera_request_photo_title">%1$s quiere tomar una foto</string>
+    <string name="continuity_camera_request_scan_text">Toca para escanear un documento con tu cámara.</string>
+    <string name="continuity_camera_request_photo_text">Toca para tomar una foto con tu cámara.</string>
+    <string name="continuity_camera_scan_title">Escanear documento</string>
+    <string name="continuity_camera_photo_title">Tomar foto</string>
+    <string name="continuity_camera_for_pc">Para %1$s</string>
+    <string name="continuity_camera_mode_photo">Foto</string>
+    <string name="continuity_camera_mode_scan">Escanear</string>
+    <string name="continuity_camera_enhance">Mejorar documento</string>
+    <string name="continuity_camera_adjust_corners">Ajustar esquinas</string>
+    <string name="continuity_camera_preview_scan">Vista previa del escaneo</string>
+    <string name="continuity_camera_retake">Repetir</string>
+    <string name="continuity_camera_send_scan">Enviar escaneo</string>
+    <string name="continuity_camera_use_photo">Usar foto</string>
+    <string name="continuity_camera_shutter_photo">Capturar foto</string>
+    <string name="continuity_camera_shutter_scan">Capturar documento</string>
+    <string name="continuity_camera_preview_desc">Vista previa de la captura</string>
+    <string name="continuity_camera_corners_desc">Arrastra las esquinas para ajustar los bordes del documento</string>
+    <string name="continuity_camera_permission_denied">Permiso de cámara denegado en el teléfono</string>
+    <string name="continuity_camera_cancelled">Cancelado en el teléfono</string>
+
+    <!-- Task notifications -->
+    <string name="task_default_label">Tarea</string>
+    <string name="task_finished_title">%1$s terminó</string>
+    <string name="task_failed_title">%1$s falló (código %2$d)</string>
+    <string name="task_took_from">%1$s · %2$s</string>
+    <string name="task_took_hm">Tardó %1$dh %2$02dm</string>
+    <string name="task_took_ms">Tardó %1$dm %2$02ds</string>
+    <string name="task_took_s">Tardó %1$ds</string>
+    <string name="task_running_short">En ejecución</string>
+
+    <!-- Errors -->
+    <string name="error_not_connected">El PC no está conectado ahora.</string>
+    <string name="error_not_paired">Ese PC ya no está vinculado.</string>
+    <string name="error_timed_out">El PC no respondió a tiempo.</string>
+    <string name="error_unsupported">La app del PC aún no admite eso.</string>
+    <string name="error_generic">Algo salió mal.</string>
+    <string name="error_denied">No está permitido. Revisa los permisos en los dos: en el PC, Broche › Ajustes › Dispositivo; en este teléfono, Ajustes › Dispositivos.</string>
+    <string name="error_not_found">Ya no existe en el PC.</string>
+
+    <!-- Theme seed names -->
+<!-- Deck defaults & accessibility -->
+    <string name="deck_tile_with_badge">%1$s, %2$s</string>
+    <string name="deck_default_page_main">Principal</string>
+    <string name="deck_page_custom">Personalizados</string>
+    <string name="deck_default_play_pause">Reproducir / pausar</string>
+    <string name="deck_default_previous">Anterior</string>
+    <string name="deck_default_next">Siguiente</string>
+    <string name="deck_default_volume_down">Bajar volumen</string>
+    <string name="deck_default_volume_up">Subir volumen</string>
+    <string name="deck_default_volume_mute">Silenciar audio</string>
+    <string name="deck_default_mic_mute">Silenciar micrófono</string>
+    <string name="deck_default_show_desktop">Mostrar escritorio</string>
+    <string name="deck_default_switch_window">Cambiar de ventana</string>
+    <string name="deck_default_screenshot">Captura de pantalla</string>
+    <string name="deck_default_lock_pc">Bloquear PC</string>
+
+    <!-- Remote special keys -->
+    <string name="remote_key_ctrl">Ctrl</string>
+    <string name="remote_key_alt">Alt</string>
+    <string name="remote_key_shift">Mayús</string>
+    <string name="remote_key_win">Win</string>
+    <string name="remote_key_esc">Esc</string>
+    <string name="remote_key_esc_desc">Escape</string>
+    <string name="remote_key_tab">Tab</string>
+    <string name="remote_key_left_desc">Flecha izquierda</string>
+    <string name="remote_key_up_desc">Flecha arriba</string>
+    <string name="remote_key_down_desc">Flecha abajo</string>
+    <string name="remote_key_right_desc">Flecha derecha</string>
+    <string name="remote_key_home">Inicio</string>
+    <string name="remote_key_end">Fin</string>
+    <string name="remote_key_del">Supr</string>
+    <string name="remote_key_del_desc">Suprimir</string>
+    <string name="remote_key_copy">Copiar</string>
+    <string name="remote_key_paste">Pegar</string>
+
+    <!-- Webcam formatting -->
+    <string name="webcam_stream_spec">%1$d × %2$d · %3$d fps</string>
+    <string name="webcam_stream_camera_spec">%1$d × %2$d · %3$s</string>
+    <string name="webcam_status_streaming_camera">Transmitiendo %1$d × %2$d a %3$s · %4$s</string>
+    <string name="webcam_switch_camera_current">Cámara: %1$s</string>
+    <string name="webcam_zoom_preset">%1$d×</string>
+
+    <!-- Formatted status & metadata phrases -->
+    <string name="transfer_requested_from_size">%1$s quiere enviar archivos · %2$s</string>
+    <string name="transfer_sending_progress">Enviando a %1$s · %2$s / %3$s</string>
+    <string name="transfer_receiving_progress">Recibiendo de %1$s · %2$s / %3$s</string>
+    <string name="clipboard_history_meta">%1$s · %2$s</string>
+    <string name="clipboard_history_meta_pinned">%1$s · %2$s · Fijado</string>
+    <string name="timeline_latest_summary">%1$s · %2$s</string>
+
+    <!-- Rich Handoff -->
+    <string name="handoff_map_from">Mapa de %1$s</string>
+    <string name="handoff_video_from">Vídeo de %1$s</string>
+    <string name="handoff_action_continue_video">Seguir viendo</string>
+    <string name="handoff_doc_received_from">De %1$s · toca para abrir</string>
+
+    <!-- Remote PC keyboard typing without mirroring -->
+    <string name="keyboard_from_pc_banner">Escribiendo desde %1$s</string>
+    <string name="keyboard_stop">Dejar de escribir</string>
+
+    <!-- Home-screen PC widget -->
+    <string name="widget_pc_title">Tu PC</string>
+    <string name="widget_pc_description">Tu PC de un vistazo: cómo está conectado, qué suena, y Enviar archivos, Copiar al PC, Atajos del PC y Controlar PC.</string>
+    <string name="widget_pc_no_pc">Ningún PC vinculado</string>
+    <string name="widget_pc_tap_to_pair">Toca para abrir Broche y vincular un PC</string>
+    <string name="widget_pc_offline">Sin conexión</string>
+    <string name="widget_pc_waking">Despertando…</string>
+    <string name="widget_nothing_playing">Nada sonando</string>
+    <string name="widget_pc_wake">Despertar</string>
+    <string name="widget_pc_waking_toast">Despertando %1$s…</string>
+
+    <!-- Companion Device Manager proximity wake -->
+
+    <!-- Flick to Send sheet -->
+
+    <!-- PC notifications & Browse PC files -->
+    <string name="channel_pc_notifications">Notificaciones del PC</string>
+    <string name="action_browse_pc_files">Archivos del PC</string>
+    <string name="pc_files_title">Archivos en %1$s</string>
+    <string name="pc_files_root">Inicio</string>
+    <string name="pc_files_up">Subir</string>
+    <string name="pc_files_empty">Esta carpeta está vacía.</string>
+    <string name="pc_files_loading">Cargando archivos…</string>
+    <string name="pc_files_downloading">Descargando %1$s…</string>
+    <string name="pc_files_saved">%1$s guardado en Descargas</string>
+    <string name="pc_files_failed">No se pudo descargar %1$s</string>
+
+    <!-- Live streaming banners, remote input setup, collapsible permissions & clipboard privacy -->
+    <string name="mirror_banner_subtitle_control_on">Toca, desliza y escribe desde tu PC</string>
+    <string name="mirror_banner_subtitle_audio">Pantalla y audio · toca Detener cuando quieras</string>
+    <string name="mirror_banner_subtitle">Transmisión de pantalla en vivo · toca Detener cuando quieras</string>
+    <string name="mirror_allow_pc_control">Permitir el control con el ratón del PC</string>
+    <string name="action_open_controls">Controles</string>
+    <string name="remote_input_requested_title">Tu PC intentó controlar este teléfono</string>
+    <string name="remote_input_requested_text">Activa “Broche: control desde tu PC” en Accesibilidad para usar el ratón y el teclado de tu PC en este teléfono.</string>
+    <string name="permissions_setup_title">Permisos y configuración (faltan %1$d)</string>
+    <string name="permissions_setup_subtitle">Notificaciones, llamadas, mensajes, fotos y acceso en segundo plano</string>
+    <string name="clipboard_preview_hidden">••••••••••••</string>
+    <string name="clipboard_preview_reveal">Mostrar</string>
+    <string name="clipboard_preview_hide">Ocultar</string>
+
+    <!-- Send queue -->
+    <string name="send_queue_title_count">Esperando para enviar · %1$d</string>
+    <string name="send_queue_cancel_all">Cancelar todo</string>
+    <string name="send_queue_clear">Borrar</string>
+    <string name="send_queue_waiting_for">Esperando a %1$s</string>
+    <string name="send_queue_sending_progress">Enviando · %1$d%%</string>
+    <string name="send_queue_sending">Enviando…</string>
+    <string name="send_queue_failed_reason">Falló · %1$s</string>
+    <string name="send_queue_expired_reason">Caducó · %1$s</string>
+    <string name="send_queue_retry">Reintentar</string>
+    <string name="send_queue_dismiss">Descartar</string>
+    <string name="send_queue_offline_toast">%1$s está sin conexión. Se enviará cuando vuelva.</string>
+    <string name="send_queue_undo">Deshacer</string>
+    <string name="send_queue_full">La cola de envío está llena. Bórrala o espera a que terminen los elementos pendientes.</string>
+    <plurals name="send_queue_dropped_unpair">
+        <item quantity="one">Se descartó %1$d elemento en cola para %2$s: el dispositivo se desvinculó.</item>
+        <item quantity="many">Se descartaron %1$d elementos en cola para %2$s: el dispositivo se desvinculó.</item>
+        <item quantity="other">Se descartaron %1$d elementos en cola para %2$s: el dispositivo se desvinculó.</item>
+    </plurals>
+
+    <!-- Setup Walkthrough -->
+    <string name="walkthrough_step_progress">Paso %1$d de %2$d</string>
+    <string name="walkthrough_action_skip">Omitir configuración</string>
+    <string name="walkthrough_action_back">Atrás</string>
+    <string name="walkthrough_action_get_started">Empezar</string>
+    <string name="walkthrough_action_continue">Continuar</string>
+    <string name="walkthrough_action_pair_later">Vincular después</string>
+    <string name="walkthrough_action_done">Listo</string>
+    <string name="walkthrough_action_open_guide">Abrir la guía de funciones</string>
+
+    <string name="walkthrough_welcome_title">Vincula tu teléfono y tu PC</string>
+    <string name="walkthrough_welcome_subtitle">Notificaciones, llamadas, mensajes, archivos, portapapeles, cámara y pantalla, compartidos con tu PC.</string>
+    <string name="walkthrough_welcome_card_heading">Privado por diseño</string>
+    <string name="walkthrough_welcome_tls_title">Cifrado de extremo a extremo (TLS 1.3)</string>
+    <string name="walkthrough_welcome_tls_body">Cada conexión usa certificados de dispositivo verificados por ambas partes.</string>
+    <string name="walkthrough_welcome_lan_title">Directo por Wi-Fi, Ethernet o USB</string>
+    <string name="walkthrough_welcome_lan_body">El tráfico se queda en tu red. Solo se usa un relé cuando Conectar por datos móviles está activado.</string>
+    <string name="walkthrough_welcome_local_title">Sin cuenta ni almacenamiento en la nube</string>
+    <string name="walkthrough_welcome_local_body">Las claves se guardan en el Android Keystore del teléfono y en el llavero del escritorio del PC.</string>
+
+    <string name="walkthrough_permissions_title">Permisos</string>
+    <string name="walkthrough_permissions_subtitle">Concede solo lo que uses. Cambia cualquier permiso después en Ajustes.</string>
+    <string name="walkthrough_permissions_granted_badge">%1$d de %2$d concedidos</string>
+    <string name="walkthrough_perm_counter">Permiso %1$d de %2$d</string>
+    <string name="walkthrough_perm_counter_optional">Permiso %1$d de %2$d · Opcional</string>
+    <string name="walkthrough_perm_status_granted">Concedido</string>
+    <string name="walkthrough_perm_status_not_granted">No concedido</string>
+    <string name="walkthrough_perm_action_grant">Conceder</string>
+    <string name="walkthrough_perm_action_manage">Gestionar</string>
+    <string name="walkthrough_perm_action_next">Siguiente</string>
+    <string name="walkthrough_perm_dot_desc">%1$s, %2$s</string>
+
+    <string name="walkthrough_perm_notif_title">Notificaciones</string>
+    <string name="walkthrough_perm_notif_does">Ve, descarta y responde las notificaciones del teléfono y controla la multimedia en tu PC.</string>
+    <string name="walkthrough_perm_notif_requires">Android requiere Acceso a las notificaciones y el permiso de notificaciones.</string>
+    <string name="walkthrough_restricted_title">Android bloqueó este ajuste</string>
+    <string name="walkthrough_restricted_body">Android retiene algunos permisos de las apps instaladas desde un archivo en lugar de una tienda de apps. Para permitir este:</string>
+    <string name="walkthrough_restricted_step1">Toca Abrir información de la app.</string>
+    <string name="walkthrough_restricted_step2">Toca ⋮ arriba a la derecha, luego Permitir ajustes restringidos, y confirma.</string>
+    <string name="walkthrough_restricted_step3">Vuelve aquí y toca Conceder otra vez.</string>
+    <string name="walkthrough_restricted_note">El menú muestra esta opción solo después de intentar conceder el permiso una vez. Algunos teléfonos lo redactan de otra forma.</string>
+    <string name="walkthrough_restricted_open">Abrir información de la app</string>
+
+    <string name="walkthrough_perm_battery_title">Batería sin restricciones</string>
+    <string name="walkthrough_perm_battery_does">Mantén tu teléfono accesible con la pantalla apagada.</string>
+    <string name="walkthrough_perm_battery_requires">Mantiene activo el enlace con tu PC mientras el teléfono está bloqueado.</string>
+
+    <string name="walkthrough_perm_calls_title">Llamadas</string>
+    <string name="walkthrough_perm_calls_does">Ve las llamadas entrantes en tu PC y contesta, rechaza o marca desde tu escritorio.</string>
+    <string name="walkthrough_perm_calls_requires">Android requiere los permisos de Teléfono y Registro de llamadas.</string>
+
+    <string name="walkthrough_perm_sms_title">Mensajes</string>
+    <string name="walkthrough_perm_sms_does">Lee y envía SMS y MMS desde tu PC con los nombres de tus contactos.</string>
+    <string name="walkthrough_perm_sms_requires">Android requiere los permisos de SMS y Contactos.</string>
+
+    <string name="walkthrough_perm_photos_title">Fotos</string>
+    <string name="walkthrough_perm_photos_does">Explora las fotos recientes del teléfono en tu PC y guarda los originales.</string>
+    <string name="walkthrough_perm_photos_requires">Android requiere acceso a Fotos y vídeos.</string>
+
+    <string name="walkthrough_perm_storage_title">Almacenamiento del teléfono en el PC</string>
+    <string name="walkthrough_perm_storage_does">Explora las carpetas de tu teléfono desde Broche en tu PC.</string>
+    <string name="walkthrough_perm_storage_requires">Android requiere acceso a todos los archivos o a carpetas seleccionadas.</string>
+
+    <string name="walkthrough_perm_access_title">Asistencia</string>
+    <string name="walkthrough_perm_access_does">Controla la pantalla duplicada de tu teléfono desde tu PC con ratón y teclado.</string>
+    <string name="walkthrough_perm_access_requires">Android requiere el servicio de Accesibilidad de Broche o el modo avanzado.</string>
+
+    <string name="walkthrough_pair_title">Vincular con tu PC</string>
+    <string name="walkthrough_pair_subtitle">Abre Broche en tu PC. Escanea su código QR o elige tu PC abajo.</string>
+    <string name="walkthrough_pair_ready_title">PC vinculado</string>
+    <string name="walkthrough_pair_badge_paired">Vinculado</string>
+    <string name="walkthrough_pair_device_online">%1$s · Conectado</string>
+    <string name="walkthrough_pair_device_offline">%1$s · Sin conexión</string>
+    <string name="walkthrough_pair_scan_qr">Escanear código QR</string>
+    <string name="walkthrough_pair_hide_qr">Ocultar el escáner QR</string>
+    <string name="walkthrough_pair_nearby_heading">PCs cercanos</string>
+    <string name="walkthrough_pair_nearby_tap">Toca para vincular en tu red local</string>
+    <string name="walkthrough_pair_usb_title">Vinculación automática por USB</string>
+    <string name="walkthrough_pair_usb_hint">Conecta un cable USB con la depuración USB activada para vincular automáticamente.</string>
+
+    <string name="walkthrough_power_title">Elige tu nivel de control</string>
+    <string name="walkthrough_power_subtitle">Elige cuánto control tiene tu PC sobre este teléfono.</string>
+    <string name="walkthrough_power_current_badge">Actual: %1$s</string>
+    <string name="walkthrough_power_badge_active">Activo</string>
+    <string name="walkthrough_power_badge_available">Disponible</string>
+    <string name="walkthrough_power_badge_optional">Opcional</string>
+    <string name="walkthrough_power_standard_title">Estándar</string>
+    <string name="walkthrough_power_standard_sub">Instalación predeterminada</string>
+    <string name="walkthrough_power_standard_desc">Notificaciones, llamadas, mensajes, fotos, archivos, la tecla Enviar portapapeles y duplicación solo para ver.</string>
+    <string name="walkthrough_power_assist_title">Asistencia</string>
+    <string name="walkthrough_power_assist_sub">Servicio de accesibilidad</string>
+    <string name="walkthrough_power_assist_desc">Añade control con ratón y teclado desde tu PC durante la duplicación de pantalla.</string>
+    <string name="walkthrough_power_assist_manage">Gestionar</string>
+    <string name="walkthrough_power_assist_open">Activar</string>
+    <string name="walkthrough_power_elevated_title">Modo avanzado</string>
+    <string name="walkthrough_power_elevated_sub">Depuración inalámbrica</string>
+    <string name="walkthrough_power_elevated_desc">Sincronización del portapapeles en segundo plano, apps en ventanas propias del PC y entrada de baja latencia.</string>
+    <string name="walkthrough_power_elevated_reconnect">Reconectar</string>
+    <string name="walkthrough_power_elevated_enable">Configurar</string>
+    <string name="walkthrough_power_elevated_hide_steps">Ocultar pasos</string>
+    <string name="walkthrough_power_elevated_show_steps">Mostrar pasos</string>
+    <string name="walkthrough_power_elevated_steps_heading">Configuración de la Depuración inalámbrica</string>
+    <string name="walkthrough_power_elevated_step1">1. En Ajustes › Acerca del teléfono, toca 7 veces Número de compilación para activar las Opciones de desarrollador.</string>
+    <string name="walkthrough_power_elevated_step2">2. Toca Configurar para abrir las Opciones de desarrollador.</string>
+    <string name="walkthrough_power_elevated_step3">3. Activa la Depuración inalámbrica, toca Vincular dispositivo con código de vinculación e introduce el código de 6 dígitos en la notificación.</string>
+
+    <string name="walkthrough_done_title">Configuración completa</string>
+    <string name="walkthrough_done_subtitle">Broche está listo. Vuelve a abrir esta guía cuando quieras desde Ajustes › Acerca de.</string>
+    <string name="walkthrough_done_summary_heading">Tu configuración</string>
+    <string name="walkthrough_done_paired_label">PC vinculado</string>
+    <string name="walkthrough_done_no_pc">Ninguno aún · vincula cuando quieras desde Inicio</string>
+    <string name="walkthrough_done_power_label">Nivel de control</string>
+    <string name="walkthrough_done_power_elevated">Modo avanzado (Depuración inalámbrica)</string>
+    <string name="walkthrough_done_power_assist">Asistencia (servicio de accesibilidad)</string>
+    <string name="walkthrough_done_power_standard">Estándar</string>
+    <string name="walkthrough_done_permissions_label">Permisos</string>
+    <string name="walkthrough_done_no_permissions">Ninguno concedido aún</string>
+    <string name="walkthrough_done_try_heading">Prueba primero</string>
+    <string name="walkthrough_done_try_1">1. Copia texto y toca la tecla Enviar portapapeles para pegarlo en tu PC.</string>
+    <string name="walkthrough_done_try_2">2. Comparte cualquier archivo o enlace con Broche desde Compartir de Android.</string>
+
+    <!-- Features Guide Chrome -->
+    <string name="guide_back">Atrás</string>
+    <string name="guide_open_walkthrough">Guía de configuración</string>
+    <string name="guide_title">Guía de funciones</string>
+    <string name="guide_subtitle">Comprueba qué funciones están listas en este teléfono o ve directo a sus controles.</string>
+    <string name="guide_search_placeholder">Buscar funciones o permisos</string>
+    <string name="guide_search_desc">Buscar funciones</string>
+    <string name="guide_connect_pc_banner">Conecta tu PC para ver qué funciones están listas</string>
+    <string name="guide_empty_title">No hay funciones que coincidan</string>
+    <string name="guide_empty_body">Prueba otra palabra clave o elige Todo.</string>
+    <string name="guide_where_prefix">Dónde: %1$s</string>
+    <string name="guide_needs_prefix">Requiere: %1$s</string>
+    <string name="guide_external_heading">Abrir desde Android</string>
+    <string name="guide_action_show_me">Mostrar</string>
+    <string name="guide_action_learn_more">Más información</string>
+    <string name="guide_action_done">Listo</string>
+    <string name="guide_sheet_where">Dónde encontrarlo</string>
+    <string name="guide_sheet_needs">Qué necesitas</string>
+    <string name="guide_sheet_steps_phone">En tu teléfono</string>
+    <string name="guide_sheet_steps_pc">En tu PC</string>
+    <string name="guide_sheet_options">Opciones</string>
+    <string name="guide_sheet_privacy">Datos y privacidad</string>
+    <string name="guide_sheet_limits">Límites</string>
+    <string name="guide_numbered_step">%1$d. %2$s</string>
+
+    <string name="guide_area_all">Todo</string>
+    <string name="guide_area_notifications_calls">Notificaciones y llamadas</string>
+    <string name="guide_area_messages">Mensajes</string>
+    <string name="guide_area_clipboard_files">Portapapeles y archivos</string>
+    <string name="guide_area_mirroring_camera">Duplicación y cámara</string>
+    <string name="guide_area_input_control">Entrada y control</string>
+    <string name="guide_area_power_network">Energía y red</string>
+
+    <string name="guide_badge_available">Listo</string>
+    <string name="guide_badge_needs_permission">Requiere %1$s</string>
+    <string name="guide_badge_needs_power">Requiere %1$s</string>
+    <string name="guide_badge_connect_pc">Conecta tu PC para comprobarlo</string>
+
+    <string name="guide_req_notification_access">Acceso a las notificaciones</string>
+    <string name="guide_req_unrestricted_battery">Batería sin restricciones</string>
+    <string name="guide_req_calls">Teléfono y Registro de llamadas</string>
+    <string name="guide_req_sms_contacts">SMS y Contactos</string>
+    <string name="guide_req_photos">Fotos</string>
+    <string name="guide_req_storage">Acceso a todos los archivos</string>
+    <string name="guide_req_dnd">Acceso a No molestar</string>
+    <string name="guide_req_elevated">Modo avanzado</string>
+    <string name="guide_req_assist_or_elevated">Asistencia o modo avanzado</string>
+
+    <string name="guide_fix_grant">Conceder</string>
+    <string name="guide_fix_allow">Permitir</string>
+    <string name="guide_fix_enable">Activar</string>
+    <string name="guide_fix_pair">Vincular</string>
+
+    <!-- Features Guide Entries -->
+    <!-- 1. Notifications -->
+    <string name="guide_notif_title">Notificaciones</string>
+    <string name="guide_notif_summary">Ve las notificaciones del teléfono en tu PC, descártalas o respóndelas al momento.</string>
+    <string name="guide_notif_where">Ajustes › Permisos › Notificaciones</string>
+    <string name="guide_notif_needs">Acceso a las notificaciones, interruptor de Notificaciones activado para el PC</string>
+    <string name="guide_notif_need_1">Acceso a las notificaciones de Android activado para Broche.</string>
+    <string name="guide_notif_need_2">En Android 13+, Permitir ajustes restringidos activado en Información de la app si se instaló fuera de la tienda.</string>
+    <string name="guide_notif_need_3">PC vinculado y conectado.</string>
+    <string name="guide_notif_phone_1">Abre Ajustes › Permisos › Notificaciones y toca Permitir.</string>
+    <string name="guide_notif_phone_2">Activa Broche en el Acceso a las notificaciones de Android.</string>
+    <string name="guide_notif_pc_1">Mira las notificaciones del teléfono en el centro de notificaciones del PC o en la ventana de Broche.</string>
+    <string name="guide_notif_pc_2">Escribe una respuesta en la tarjeta y pulsa Enviar, o descarta para borrar en ambos dispositivos.</string>
+    <string name="guide_notif_opt_1">Permitir / Gestionar: abre los ajustes de Acceso a las notificaciones de Android.</string>
+    <string name="guide_notif_opt_2">Interruptor de Notificaciones por PC: controla si un PC vinculado recibe notificaciones.</string>
+    <string name="guide_notif_privacy">Las notificaciones viajan por TLS 1.3 y se quedan en memoria en este teléfono.</string>
+    <string name="guide_notif_limits">Las notificaciones permanentes del sistema no se pueden descartar de forma remota.</string>
+
+    <!-- 2. Calls -->
+    <string name="guide_calls_title">Llamadas</string>
+    <string name="guide_calls_summary">Ve las llamadas entrantes en tu PC, contesta o rechaza, y marca números desde tu escritorio.</string>
+    <string name="guide_calls_where">Ajustes › Permisos › Llamadas, contactos y mensajes</string>
+    <string name="guide_calls_needs">Permisos de Teléfono, Registro de llamadas y Contactos</string>
+    <string name="guide_calls_need_1">Permisos de Teléfono y Registro de llamadas concedidos en Android.</string>
+    <string name="guide_calls_need_2">Permiso de Contactos concedido para ver nombres y fotos de quien llama.</string>
+    <string name="guide_calls_phone_1">Abre Ajustes › Permisos › Llamadas, contactos y mensajes y toca Permitir.</string>
+    <string name="guide_calls_phone_2">Usa la notificación de llamada activa para los controles Silenciar, Altavoz y Colgar.</string>
+    <string name="guide_calls_pc_1">Contesta, rechaza o responde con un SMS desde el aviso de llamada entrante en tu PC.</string>
+    <string name="guide_calls_pc_2">Abre Llamadas en tu PC para ver el historial o marcar un número.</string>
+    <string name="guide_calls_opt_1">Contestar / Rechazar: acepta o rechaza la llamada entrante en tu teléfono.</string>
+    <string name="guide_calls_opt_2">Silenciar / Altavoz: activa o desactiva el silencio del micrófono o el altavoz durante una llamada.</string>
+    <string name="guide_calls_privacy">El historial de llamadas se lee de Android cuando tu PC se conecta y nunca sale de tus dispositivos vinculados.</string>
+    <string name="guide_calls_need_bluetooth">Para escuchar y hablar desde el PC, empareja el teléfono y el PC en los ajustes Bluetooth del sistema y activa Llamadas telefónicas para este PC en el teléfono. El PC debe admitir llamadas Bluetooth mediante PipeWire.</string>
+    <string name="guide_calls_limits">Sin una conexión Bluetooth compatible, el audio de la llamada se queda en tu teléfono o auricular. Silenciar y poner en espera desde el PC necesitan el modo avanzado en Android 12+ y su interruptor Controlar llamadas desde el PC.</string>
+
+    <!-- 3. Now playing -->
+    <string name="guide_media_title">Reproduciendo ahora</string>
+    <string name="guide_media_summary">Controla la reproducción multimedia del teléfono y del PC, ajusta el volumen del PC o transmite el audio del PC al altavoz del teléfono.</string>
+    <string name="guide_media_where">Inicio › Tarjeta del PC vinculado › Audio del PC</string>
+    <string name="guide_media_needs">Acceso a las notificaciones para la multimedia del teléfono, PC vinculado conectado para el audio del PC</string>
+    <string name="guide_media_need_1">Acceso a las notificaciones en Android para leer las sesiones multimedia activas.</string>
+    <string name="guide_media_need_2">PC vinculado y conectado.</string>
+    <string name="guide_media_phone_1">En Inicio, despliega Audio del PC en la tarjeta de tu PC vinculado.</string>
+    <string name="guide_media_phone_2">Ajusta el control de volumen del PC o activa Usar el teléfono como altavoz.</string>
+    <string name="guide_media_pc_1">Controla la reproducción del teléfono con Reproducir, Pausar, Siguiente y Anterior en tu PC.</string>
+    <string name="guide_media_opt_1">Usar el teléfono como altavoz: transmite el audio de tu PC a tu teléfono con baja latencia.</string>
+    <string name="guide_media_opt_2">Volumen y Silencio: controlan el dispositivo de reproducción predeterminado de tu PC.</string>
+    <string name="guide_media_privacy">Los metadatos y la carátula provienen de la sesión multimedia local por TLS 1.3.</string>
+    <string name="guide_media_limits">La transmisión de audio del PC en vivo requiere una conexión Wi-Fi o USB estable.</string>
+
+    <!-- 4. Messages -->
+    <string name="guide_sms_title">Mensajes</string>
+    <string name="guide_sms_summary">Lee conversaciones, ve archivos adjuntos MMS y envía mensajes desde tu PC.</string>
+    <string name="guide_sms_where">Ajustes › Permisos › Llamadas, contactos y mensajes</string>
+    <string name="guide_sms_needs">Permisos de SMS y Contactos</string>
+    <string name="guide_sms_need_1">Permiso de SMS concedido en Android.</string>
+    <string name="guide_sms_need_2">Permiso de Contactos concedido para ver nombres y avatares.</string>
+    <string name="guide_sms_phone_1">Abre Ajustes › Permisos › Llamadas, contactos y mensajes y permite Mensajes desde tu PC y Contactos.</string>
+    <string name="guide_sms_pc_1">Abre Mensajes en tu PC para leer conversaciones o enviar respuestas SMS y MMS.</string>
+    <string name="guide_sms_opt_1">Permitir / Gestionar: abre los ajustes de permisos de Android para SMS y Contactos.</string>
+    <string name="guide_sms_opt_2">Caché de mensajes: borra los archivos MMS temporales en Ajustes › Datos y almacenamiento.</string>
+    <string name="guide_sms_privacy">Los mensajes se leen de la telefonía de Android cuando hace falta.</string>
+    <string name="guide_sms_limits">El envío usa la tarjeta SIM y el plan de tu operador.</string>
+
+    <!-- 5. Clipboard -->
+    <string name="guide_clip_title">Portapapeles</string>
+    <string name="guide_clip_summary">Comparte texto copiado en los dos sentidos, envía imágenes copiadas del teléfono al PC y consulta los últimos 50 fragmentos en el Historial del portapapeles.</string>
+    <string name="guide_clip_where">Actividad › Historial del portapapeles (o Ajustes › Funciones › Portapapeles)</string>
+    <string name="guide_clip_needs">PC vinculado; modo avanzado para la sincronización automática del teléfono al PC en segundo plano</string>
+    <string name="guide_clip_need_1">La sincronización del portapapeles del PC al teléfono y la tecla Enviar portapapeles funcionan sin configurar nada.</string>
+    <string name="guide_clip_need_2">El modo avanzado añade la sincronización automática del portapapeles del teléfono al PC.</string>
+    <string name="guide_clip_phone_1">Copia texto o una imagen en tu teléfono, luego abre Broche o toca la tecla Enviar portapapeles.</string>
+    <string name="guide_clip_phone_2">Toca Historial del portapapeles en Inicio para ver, fijar, copiar o eliminar fragmentos recientes.</string>
+    <string name="guide_clip_pc_1">Copia texto o una imagen en tu PC para enviarlo al portapapeles de tu teléfono.</string>
+    <string name="guide_clip_opt_1">Mostrar / Ocultar: oculta o muestra la vista previa del último fragmento en Inicio.</string>
+    <string name="guide_clip_opt_2">Fijar: mantiene un fragmento arriba en el historial de 50 elementos.</string>
+    <string name="guide_clip_opt_3">Sugerir acciones para el texto copiado: ofrece abrir enlaces, mapas o números desde tu PC.</string>
+    <string name="guide_clip_privacy">El historial del portapapeles está cifrado en disco y excluye los fragmentos que los gestores de contraseñas marcan como sensibles.</string>
+    <string name="guide_clip_limits">Android 10+ bloquea la lectura del portapapeles en segundo plano sin el modo avanzado ni tocar Enviar portapapeles.</string>
+
+    <!-- 6. Send clipboard -->
+    <string name="guide_tile_title">Enviar portapapeles</string>
+    <string name="guide_tile_summary">Envía el portapapeles de tu teléfono a tu PC desde cualquier app con la tecla de Ajustes rápidos.</string>
+    <string name="guide_tile_where">Panel de Ajustes rápidos de Android › Enviar portapapeles</string>
+    <string name="guide_tile_needs">PC vinculado</string>
+    <string name="guide_tile_ext_1">1. Desliza dos veces hacia abajo desde la parte superior de la pantalla para abrir los Ajustes rápidos.</string>
+    <string name="guide_tile_ext_2">2. Toca Editar y arrastra Enviar portapapeles a tus teclas activas.</string>
+    <string name="guide_tile_ext_3">3. Copia texto en cualquier app, desliza hacia abajo y toca Enviar portapapeles.</string>
+    <string name="guide_tile_need_1">Al menos un PC vinculado.</string>
+    <string name="guide_tile_phone_1">Añade la tecla Enviar portapapeles a los Ajustes rápidos una vez y tócala después de copiar.</string>
+    <string name="guide_tile_pc_1">Pega en tu PC con Ctrl+V.</string>
+    <string name="guide_tile_opt_1">Tecla Enviar portapapeles: lee el portapapeles actual del teléfono una vez al tocarla y lo envía o lo pone en cola.</string>
+    <string name="guide_tile_privacy">Lee el portapapeles solo al tocarla. Los fragmentos sin conexión esperan en cola hasta 24 horas.</string>
+    <string name="guide_tile_limits">Se usa cuando la sincronización del portapapeles en segundo plano del modo avanzado no está activa.</string>
+
+    <!-- 7. Send files -->
+    <string name="guide_files_title">Enviar archivos</string>
+    <string name="guide_files_summary">Transfiere archivos o carpetas entre el teléfono y el PC por Wi-Fi, Ethernet o USB, con pausa y reanudación.</string>
+    <string name="guide_files_where">Inicio › Tarjeta del PC vinculado › Enviar archivos / Enviar una carpeta</string>
+    <string name="guide_files_needs">PC vinculado</string>
+    <string name="guide_files_need_1">PC vinculado (los archivos sin conexión esperan en la cola de envío hasta 7 días).</string>
+    <string name="guide_files_phone_1">En Inicio, toca Enviar archivos o Enviar una carpeta en la tarjeta de tu PC vinculado.</string>
+    <string name="guide_files_phone_2">Pausa, reanuda o cancela las transferencias activas en la tarjeta Transferencias de Inicio.</string>
+    <string name="guide_files_pc_1">Arrastra archivos a la ventana de Broche o a la isla del borde superior de tu PC.</string>
+    <string name="guide_files_opt_1">Enviar archivos / Enviar una carpeta: transfiere archivos sueltos o árboles de carpetas completos.</string>
+    <string name="guide_files_opt_2">Pausar / Reanudar: reanuda las transferencias interrumpidas sin reenviar los bytes ya completados.</string>
+    <string name="guide_files_privacy">Los archivos viajan por QUIC TLS 1.3 con verificación de integridad BLAKE3 hacia Download/Broche.</string>
+    <string name="guide_files_limits">Hasta 5.000 archivos por lote.</string>
+
+    <!-- 8. Send queue -->
+    <string name="guide_queue_title">Cola de envío</string>
+    <string name="guide_queue_summary">Pon en cola archivos, enlaces y fragmentos mientras tu PC está sin conexión y se entregan cuando vuelva a conectarse.</string>
+    <string name="guide_queue_where">Inicio › Tarjeta Esperando para enviar</string>
+    <string name="guide_queue_needs">PC vinculado</string>
+    <string name="guide_queue_need_1">Al menos un PC vinculado.</string>
+    <string name="guide_queue_phone_1">Envía archivos, fragmentos o enlaces a un PC sin conexión; aparecen en Esperando para enviar en Inicio.</string>
+    <string name="guide_queue_phone_2">Los elementos en cola se envían automáticamente y en orden en cuanto tu PC se reconecta.</string>
+    <string name="guide_queue_pc_1">Los elementos en cola en tu PC mientras tu teléfono está sin conexión también se entregan al reconectarse.</string>
+    <string name="guide_queue_opt_1">Reintentar / Descartar / Cancelar todo: gestiona elementos en cola individuales o todos en Inicio.</string>
+    <string name="guide_queue_privacy">Los datos en cola se quedan en el almacenamiento privado de la app y se eliminan al entregarse o al desvincular.</string>
+    <string name="guide_queue_limits">Admite hasta 200 elementos o 10 GiB. Los archivos caducan a los 7 días; los fragmentos y enlaces a las 24 horas.</string>
+
+    <!-- 9. Send to PC -->
+    <string name="guide_share_title">Enviar al PC</string>
+    <string name="guide_share_summary">Comparte enlaces, texto, fotos o documentos desde cualquier app de Android a tu PC con el menú Compartir del sistema, o pon una imagen en el portapapeles del PC con Copiar al portapapeles del PC.</string>
+    <string name="guide_share_where">Menú Compartir de Android › Enviar al PC</string>
+    <string name="guide_share_needs">PC vinculado</string>
+    <string name="guide_share_ext_1">1. Toca Compartir en cualquier navegador, galería o app de documentos de tu teléfono.</string>
+    <string name="guide_share_ext_2">2. Selecciona Broche (Enviar al PC o Abrir en el PC).</string>
+    <string name="guide_share_need_1">Al menos un PC vinculado.</string>
+    <string name="guide_share_phone_1">Comparte cualquier enlace o archivo desde Compartir de Android y elige tu PC de destino.</string>
+    <string name="guide_share_pc_1">Los enlaces se abren en el navegador predeterminado del PC; los archivos se guardan en Descargas.</string>
+    <string name="guide_share_opt_1">Enviar al PC / Abrir en el PC: guarda archivos o abre enlaces y documentos seguros al llegar.</string>
+    <string name="guide_share_privacy">Los ejecutables y scripts nunca se abren automáticamente en tu PC.</string>
+    <string name="guide_share_limits">Solo los tipos de documento seguros se abren automáticamente; los demás archivos se guardan en Descargas.</string>
+
+    <!-- 10. Storage in File Explorer -->
+    <string name="guide_storage_title">Almacenamiento del teléfono en el PC</string>
+    <string name="guide_storage_summary">Explora el almacenamiento compartido de este teléfono o las carpetas seleccionadas desde Broche en tu PC.</string>
+    <string name="guide_storage_where">Ajustes › Permisos › Fotos y vídeos (y Ajustes › Dispositivos › Permisos detallados)</string>
+    <string name="guide_storage_needs">Acceso a todos los archivos (o carpetas seleccionadas) y «Explorar el almacenamiento del teléfono» para el PC</string>
+    <string name="guide_storage_need_1">Acceso a todos los archivos o carpetas seleccionadas en Ajustes › Permisos › Fotos y vídeos.</string>
+    <string name="guide_storage_need_2">«Explorar el almacenamiento del teléfono» activado para el PC en Ajustes › Dispositivos › Permisos detallados.</string>
+    <string name="guide_storage_phone_1">Concede Acceso a todos los archivos o elige carpetas en Ajustes › Permisos › Fotos y vídeos.</string>
+    <string name="guide_storage_phone_2">Activa «Explorar el almacenamiento del teléfono» para tu PC en Ajustes › Dispositivos › Permisos detallados.</string>
+    <string name="guide_storage_pc_1">Abre el almacenamiento del teléfono en Broche en tu PC: Archivos y fotos › Archivos.</string>
+    <string name="guide_storage_opt_1">Acceso a todos los archivos / Solo carpetas seleccionadas: comparte todo el almacenamiento o solo las carpetas que elijas.</string>
+    <string name="guide_storage_privacy">La exploración del almacenamiento está desactivada por defecto para cada PC hasta que la actives.</string>
+    <string name="guide_storage_limits">Android bloquea el acceso a los directorios privados de las apps en /Android/data.</string>
+
+    <!-- 11. Browse PC files -->
+    <string name="guide_pc_files_title">Explorar archivos del PC</string>
+    <string name="guide_pc_files_summary">Explora desde tu teléfono las carpetas que comparte tu PC y descarga archivos a Descargas.</string>
+    <string name="guide_pc_files_where">Inicio › Tarjeta del PC vinculado › Archivos del PC</string>
+    <string name="guide_pc_files_needs">PC vinculado conectado con el uso compartido de almacenamiento activado</string>
+    <string name="guide_pc_files_need_1">PC vinculado y conectado con el acceso al almacenamiento activado para este teléfono.</string>
+    <string name="guide_pc_files_phone_1">En Inicio, toca Explorar archivos del PC en la tarjeta de tu PC vinculado y toca cualquier archivo para descargarlo.</string>
+    <string name="guide_pc_files_pc_1">Permite el acceso al almacenamiento de este teléfono en Broche en tu PC.</string>
+    <string name="guide_pc_files_opt_1">Hoja Explorar archivos del PC: navega por las carpetas del PC y descarga archivos a Descargas.</string>
+    <string name="guide_pc_files_privacy">Los archivos descargados se guardan localmente en la carpeta Descargas de tu teléfono.</string>
+    <string name="guide_pc_files_limits">Requiere que el PC vinculado esté conectado.</string>
+
+    <!-- 12. Photos -->
+    <string name="guide_photos_title">Fotos</string>
+    <string name="guide_photos_summary">Explora las fotos, capturas y vídeos de tu teléfono en tu PC y guarda los originales en resolución completa.</string>
+    <string name="guide_photos_where">Ajustes › Permisos › Fotos y vídeos</string>
+    <string name="guide_photos_needs">Permiso de Fotos y vídeos</string>
+    <string name="guide_photos_need_1">Permiso de Fotos y vídeos concedido en Android.</string>
+    <string name="guide_photos_phone_1">Abre Ajustes › Permisos › Fotos y vídeos y toca Permitir.</string>
+    <string name="guide_photos_pc_1">Abre Fotos en tu PC para ver las miniaturas y copiar o guardar los originales.</string>
+    <string name="guide_photos_opt_1">Permitir todas: concede acceso a toda la galería cuando el acceso parcial a fotos está activo en Android 14+.</string>
+    <string name="guide_photos_privacy">Las miniaturas se generan localmente en tu teléfono cuando hace falta.</string>
+    <string name="guide_photos_limits">El acceso parcial a fotos en Android 14+ muestra solo las fotos que seleccionaste.</string>
+
+    <!-- 13. Timeline -->
+    <string name="guide_timeline_title">Historial</string>
+    <string name="guide_timeline_summary">Busca en un historial local de archivos, fragmentos, enlaces, fotos y sesiones compartidos con tus PCs.</string>
+    <string name="guide_timeline_where">Actividad › Historial (y Ajustes › Datos y almacenamiento)</string>
+    <string name="guide_timeline_needs">Sin permisos adicionales</string>
+    <string name="guide_timeline_need_1">Al menos un elemento compartido, para que el Historial tenga algo que mostrar.</string>
+    <string name="guide_timeline_phone_1">Abre Actividad › Historial para buscar, filtrar por tipo o tocar Enviar de nuevo en elementos anteriores.</string>
+    <string name="guide_timeline_pc_1">En tu PC, lo que envía el teléfono se guarda en ~/Broche/Recibidos.</string>
+    <string name="guide_timeline_opt_1">Conservar elementos del historial (30 días, 90 días, 1 año, todo): elígelo en Ajustes › Datos y almacenamiento.</string>
+    <string name="guide_timeline_privacy">Se guarda solo en una base de datos SQLite local en tu dispositivo.</string>
+    <string name="guide_timeline_limits">Conserva hasta 5.000 entradas localmente.</string>
+
+    <!-- 14. LocalSend -->
+    <string name="guide_localsend_title">LocalSend</string>
+    <string name="guide_localsend_summary">Envía y recibe archivos con dispositivos LocalSend cercanos en la misma red Wi-Fi sin vincular.</string>
+    <string name="guide_localsend_where">Ajustes › Funciones › LocalSend (y Actividad › LocalSend cercano)</string>
+    <string name="guide_localsend_needs">LocalSend activado en Ajustes › Funciones</string>
+    <string name="guide_localsend_need_1">Interruptor de LocalSend activado en Ajustes › Funciones.</string>
+    <string name="guide_localsend_phone_1">Activa LocalSend en Ajustes › Funciones y usa la tarjeta LocalSend cercano en Actividad.</string>
+    <string name="guide_localsend_pc_1">Envía o acepta archivos con cualquier dispositivo LocalSend de la misma red local.</string>
+    <string name="guide_localsend_opt_1">Interruptor de LocalSend: controla el descubrimiento multicast en la red local por el puerto 53317.</string>
+    <string name="guide_localsend_privacy">Desactivado por defecto; las transferencias entrantes siempre preguntan antes de guardar.</string>
+    <string name="guide_localsend_limits">Solo funciona en la misma red local.</string>
+
+    <!-- 15. Screen mirroring -->
+    <string name="guide_mirror_title">Duplicación de pantalla</string>
+    <string name="guide_mirror_summary">Transmite la pantalla de tu teléfono y su audio interno a una ventana de tu PC, o ve la pantalla de tu PC en tu teléfono.</string>
+    <string name="guide_mirror_where">Ajustes › Permisos › Control desde tu PC (o Inicio › Controlar PC)</string>
+    <string name="guide_mirror_needs">PC vinculado conectado; Asistencia o modo avanzado para el control con ratón y teclado</string>
+    <string name="guide_mirror_need_1">PC vinculado y conectado.</string>
+    <string name="guide_mirror_need_2">Opcional: Asistencia (Accesibilidad) o modo avanzado para la entrada con ratón y teclado del PC.</string>
+    <string name="guide_mirror_phone_1">Toca Iniciar ahora en el aviso de captura de Android cuando la duplicación empiece desde tu PC.</string>
+    <string name="guide_mirror_phone_2">Toca Detener en el banner de Inicio cuando quieras para terminar de compartir la pantalla.</string>
+    <string name="guide_mirror_pc_1">Inicia la Duplicación de pantalla en tu PC para abrir una ventana en vivo de tu teléfono.</string>
+    <string name="guide_mirror_opt_1">Detener: termina la captura de pantalla al instante desde Inicio o desde la notificación.</string>
+    <string name="guide_mirror_privacy">Requiere confirmación en tu teléfono, salvo que se inicie mediante la pantalla virtual del modo avanzado.</string>
+    <string name="guide_mirror_limits">Las apps con FLAG_SECURE se ven en negro en las transmisiones estándar de MediaProjection.</string>
+
+    <!-- 16. App streams -->
+    <string name="guide_apps_title">Apps en ventanas</string>
+    <string name="guide_apps_summary">Abre apps de Android sueltas en ventanas propias de tu PC mientras la pantalla de tu teléfono sigue independiente.</string>
+    <string name="guide_apps_where">Ajustes › Permisos › Control desde tu PC › Toques y teclas reales (Depuración inalámbrica)</string>
+    <string name="guide_apps_needs">Modo avanzado (Depuración inalámbrica)</string>
+    <string name="guide_apps_need_1">Modo avanzado, configurado mediante la Depuración inalámbrica.</string>
+    <string name="guide_apps_need_2">PC vinculado y conectado.</string>
+    <string name="guide_apps_phone_1">Configura la Depuración inalámbrica en Ajustes › Permisos › Control desde tu PC.</string>
+    <string name="guide_apps_pc_1">Abre Apps en ventanas en tu PC y haz clic en cualquier app del teléfono para lanzarla en su propia ventana.</string>
+    <string name="guide_apps_opt_1">Cerrar todas: cierra todas las ventanas de apps de pantalla virtual activas desde el banner de Inicio.</string>
+    <string name="guide_apps_privacy">Las ventanas de apps se transmiten por TLS 1.3 desde una pantalla virtual local de este teléfono.</string>
+    <string name="guide_apps_limits">Requiere el modo avanzado para crear pantallas virtuales en Android.</string>
+
+    <!-- 17. Phone as webcam -->
+    <string name="guide_webcam_title">Teléfono como webcam</string>
+    <string name="guide_webcam_summary">Transmite la cámara frontal o trasera de tu teléfono a tu PC hasta en 1080p o 60 fps.</string>
+    <string name="guide_webcam_where">Inicio › Tarjeta del PC vinculado › Webcam</string>
+    <string name="guide_webcam_needs">Permiso de cámara, PC vinculado conectado</string>
+    <string name="guide_webcam_need_1">Permiso de cámara en Android y un PC vinculado conectado.</string>
+    <string name="guide_webcam_phone_1">En Inicio, toca Webcam en la tarjeta de tu PC vinculado, elige resolución y lente, y toca Iniciar webcam.</string>
+    <string name="guide_webcam_pc_1">Mira la cámara en vivo en Broche en tu PC y guarda una foto de ella.</string>
+    <string name="guide_webcam_opt_1">Cambiar de cámara / Linterna / Zoom / Resolución (720p, 1080p experimental): controles de la cámara en vivo.</string>
+    <string name="guide_webcam_privacy">Nunca empieza en silencio; muestra una notificación permanente mientras transmite.</string>
+    <string name="guide_webcam_limits">La cámara se ve en Broche en el PC; las apps de videollamada no pueden usarla como cámara. 1080p a 60 fps es experimental y necesita un codificador por hardware compatible y un Wi-Fi o USB rápido.</string>
+
+    <!-- 18. Continuity camera -->
+    <string name="guide_continuity_title">Continuity Camera</string>
+    <string name="guide_continuity_summary">Toma una foto o escanea y recorta un documento con la cámara de tu teléfono directamente en tu PC.</string>
+    <string name="guide_continuity_where">Solicitado desde tu PC › aviso de Continuity Camera en el teléfono</string>
+    <string name="guide_continuity_needs">Permiso de cámara, PC vinculado conectado</string>
+    <string name="guide_continuity_need_1">Permiso de cámara en Android y un PC vinculado conectado.</string>
+    <string name="guide_continuity_phone_1">Toca la notificación o el banner de la solicitud, toma una foto o ajusta las esquinas del documento y toca Enviar.</string>
+    <string name="guide_continuity_pc_1">Activa Tomar foto o Escanear documento desde Broche en tu PC.</string>
+    <string name="guide_continuity_opt_1">Ajustar esquinas / Mejorar documento: recorte de perspectiva y mejora de contraste para escaneos.</string>
+    <string name="guide_continuity_privacy">Las capturas solo se envían cuando tocas Usar foto o Enviar escaneo.</string>
+    <string name="guide_continuity_limits">Las solicitudes de cámara caducan a los 2 minutos si no se responden.</string>
+
+
+    <!-- 20. Control PC -->
+    <string name="guide_remote_title">Controlar PC</string>
+    <string name="guide_remote_summary">Usa tu teléfono como panel táctil, teclado, micrófono de dictado, ratón aéreo o control de presentaciones para tu PC.</string>
+    <string name="guide_remote_where">Inicio › Tarjeta del PC vinculado › Controlar PC</string>
+    <string name="guide_remote_needs">PC vinculado conectado con el control remoto permitido</string>
+    <string name="guide_remote_need_1">PC vinculado y conectado con el control permitido para este teléfono.</string>
+    <string name="guide_remote_phone_1">En Inicio, toca Controlar PC en la tarjeta de tu PC vinculado.</string>
+    <string name="guide_remote_phone_2">Cambia entre Panel táctil, Ratón aéreo, Presentación, Teclado y Dictar.</string>
+    <string name="guide_remote_pc_1">Aprueba el control remoto en tu PC cuando se te pida.</string>
+    <string name="guide_remote_opt_1">Velocidad del panel táctil: ajusta la sensibilidad en Ajustes › Funciones › Controla tu PC.</string>
+    <string name="guide_remote_privacy">Los eventos de entrada viajan por flujos QUIC cifrados hasta tu PC vinculado.</string>
+    <string name="guide_remote_limits">El ratón aéreo requiere un giroscopio físico en tu teléfono.</string>
+
+    <!-- 21. Assist -->
+    <string name="guide_assist_title">Asistencia</string>
+    <string name="guide_assist_summary">Deja que el ratón y el teclado de tu PC toquen, deslicen y escriban en este teléfono mediante el servicio de Accesibilidad.</string>
+    <string name="guide_assist_where">Ajustes › Permisos › Control desde tu PC › Usar el ratón y el teclado de tu PC</string>
+    <string name="guide_assist_needs">Servicio de accesibilidad activado</string>
+    <string name="guide_assist_need_1">Servicio de Accesibilidad de Broche activado en los Ajustes de Android.</string>
+    <string name="guide_assist_phone_1">Abre Ajustes › Permisos › Control desde tu PC y toca Permitir en Usar el ratón y el teclado de tu PC.</string>
+    <string name="guide_assist_pc_1">Haz clic, arrastra, desplázate y escribe dentro de la ventana espejo del teléfono en tu PC.</string>
+    <string name="guide_assist_opt_1">Dejar de escribir: termina la escritura remota del teclado del PC desde el banner de Inicio.</string>
+    <string name="guide_assist_privacy">Inyecta gestos y texto desde tu PC vinculado; no lee el contenido de la pantalla ni contraseñas.</string>
+    <string name="guide_assist_limits">Los APK instalados fuera de la tienda en Android 13+ deben activar antes Permitir ajustes restringidos en Información de la app.</string>
+
+    <!-- 22. Elevated -->
+    <string name="guide_elevated_title">Modo avanzado</string>
+    <string name="guide_elevated_summary">Toques y teclas reales, apps en ventanas y sincronización del portapapeles en segundo plano mediante la Depuración inalámbrica; si lo permites, también controles durante las llamadas y notificaciones sensibles.</string>
+    <string name="guide_elevated_where">Ajustes › Permisos › Control desde tu PC › Toques y teclas reales (Depuración inalámbrica)</string>
+    <string name="guide_elevated_needs">Depuración inalámbrica</string>
+    <string name="guide_elevated_need_1">Opciones de desarrollador y Depuración inalámbrica activadas.</string>
+    <string name="guide_elevated_phone_1">Abre Ajustes › Permisos › Control desde tu PC y toca Configurar en Toques y teclas reales.</string>
+    <string name="guide_elevated_phone_2">En la Depuración inalámbrica, toca Vincular dispositivo con código de vinculación e introduce el código de 6 dígitos en la notificación.</string>
+    <string name="guide_elevated_pc_1">Usa Apps en ventanas, la sincronización del portapapeles en segundo plano y la entrada de baja latencia desde tu PC.</string>
+    <string name="guide_elevated_opt_1">Configurar / Desactivar: vincula o detiene el ayudante local de la Depuración inalámbrica.</string>
+    <string name="guide_elevated_privacy">Funciona en este teléfono mediante su propia Depuración inalámbrica; no interviene ningún servidor externo.</string>
+    <string name="guide_elevated_limits">La primera vinculación de la Depuración inalámbrica requiere Wi-Fi.</string>
+
+    <!-- 23. Deck -->
+    <string name="guide_deck_title">Atajos del PC</string>
+    <string name="guide_deck_summary">Usa tu teléfono como una cuadrícula de teclas de acceso directo, teclas multimedia, controles de volumen e indicadores del sistema del PC en vivo.</string>
+    <string name="guide_deck_where">Inicio › Tarjeta del PC vinculado › Atajos del PC</string>
+    <string name="guide_deck_needs">PC vinculado conectado</string>
+    <string name="guide_deck_need_1">PC vinculado y conectado.</string>
+    <string name="guide_deck_phone_1">En Inicio, toca Atajos del PC en la tarjeta de tu PC vinculado y toca cualquier botón para hacerlo en el PC.</string>
+    <string name="guide_deck_pc_1">Añade tus propios atajos en Broche en tu PC: Ajustes › Preferencias.</string>
+    <string name="guide_deck_opt_1">Pantalla completa: los atajos ocupan toda la pantalla del teléfono.</string>
+    <string name="guide_deck_privacy">Tus atajos y las estadísticas del PC quedan entre tu teléfono y tu PC vinculado.</string>
+    <string name="guide_deck_limits">Los atajos que ejecutan órdenes necesitan «Dejar que ejecute comandos en este PC» activado para este teléfono en Broche en tu PC.</string>
+
+
+    <!-- 25. Wake PC -->
+    <string name="guide_wake_title">Despertar PC</string>
+    <string name="guide_wake_summary">Despierta un PC vinculado suspendido a través de tu red local con Wake-on-LAN.</string>
+    <string name="guide_wake_where">Inicio › Tarjeta del PC vinculado › Despertar</string>
+    <string name="guide_wake_needs">PC vinculado con Wake-on-LAN activado en la BIOS y en el adaptador de red</string>
+    <string name="guide_wake_need_1">PC vinculado conectado por LAN al menos una vez para que Broche conozca su dirección MAC.</string>
+    <string name="guide_wake_need_2">Wake-on-LAN activado en la BIOS/UEFI y en los ajustes de red del PC.</string>
+    <string name="guide_wake_phone_1">Cuando tu PC vinculado esté sin conexión en Inicio, toca Despertar en su tarjeta.</string>
+    <string name="guide_wake_pc_1">Activa Wake-on-LAN en la conexión por cable del PC, en sus ajustes de red.</string>
+    <string name="guide_wake_opt_1">Despertar: envía un paquete Wake-on-LAN por la red local.</string>
+    <string name="guide_wake_privacy">Usa la dirección MAC aprendida durante una sesión LAN autenticada anterior.</string>
+    <string name="guide_wake_limits">Requiere Ethernet o un adaptador Wi-Fi compatible con Wake on Wireless LAN.</string>
+
+    <!-- 26. Quick actions -->
+    <string name="guide_quick_title">Acciones rápidas</string>
+    <string name="guide_quick_summary">Haz sonar, bloquea o suspende tu PC desde Inicio o el widget de la pantalla de inicio, y controla No molestar y la linterna del teléfono desde tu PC.</string>
+    <string name="guide_quick_where">Inicio › Tarjeta del PC vinculado (y Ajustes › Permisos › Control desde tu PC)</string>
+    <string name="guide_quick_needs">Acceso a No molestar para los interruptores del PC al teléfono</string>
+    <string name="guide_quick_need_1">Hacer sonar el PC, Bloquear PC, Suspender y la linterna del teléfono funcionan sin permisos adicionales.</string>
+    <string name="guide_quick_need_2">No molestar y el modo silencio requieren acceso a No molestar.</string>
+    <string name="guide_quick_phone_1">Usa Hacer sonar PC, Bloquear PC y Suspender en la tarjeta de tu PC vinculado en Inicio, o añade el widget de acciones rápidas del PC.</string>
+    <string name="guide_quick_pc_1">Cambia No molestar, el timbre, la linterna y el volumen del teléfono desde Broche en tu PC.</string>
+    <string name="guide_quick_opt_1">No molestar: concédelo en Ajustes › Permisos › Control desde tu PC.</string>
+    <string name="guide_quick_privacy">Los comandos se autentican por dispositivo mediante TLS 1.3.</string>
+    <string name="guide_quick_limits">Bloquear y suspender el PC se puede activar o desactivar por teléfono en Ajustes › Dispositivos del PC.</string>
+
+    <!-- 27. Connect over mobile data -->
+    <string name="guide_away_title">Conectar por datos móviles</string>
+    <string name="guide_away_summary">Mantente conectado a tu PC por datos móviles cuando estés fuera del Wi-Fi, o enlaza con un cable USB.</string>
+    <string name="guide_away_where">Ajustes › Dispositivos › Conectar por datos móviles</string>
+    <string name="guide_away_needs">Batería sin restricciones, Conectar por datos móviles activado</string>
+    <string name="guide_away_need_1">Batería sin restricciones en Ajustes › Permisos › Segundo plano y batería.</string>
+    <string name="guide_away_need_2">Conectar por datos móviles activado en Ajustes › Dispositivos.</string>
+    <string name="guide_away_phone_1">Activa Conectar por datos móviles en Ajustes › Dispositivos.</string>
+    <string name="guide_away_pc_1">La tarjeta de tu PC muestra Conectado desde fuera de casa o Por USB según el enlace activo.</string>
+    <string name="guide_away_opt_1">Conectar por datos móviles: usa un relé cifrado de extremo a extremo cuando no hay LAN ni USB.</string>
+    <string name="guide_away_privacy">El tráfico del relé está cifrado de extremo a extremo con las claves TLS 1.3 de tus dispositivos vinculados.</string>
+    <string name="guide_away_limits">Las transferencias de archivos por datos móviles consumen tu plan de datos.</string>
+
+    <!-- 28. Connection Doctor -->
+    <string name="guide_doctor_title">Doctor de conexión</string>
+    <string name="guide_doctor_summary">Revisa los ajustes de batería en segundo plano y el acceso a la red local para que tu teléfono siga localizable.</string>
+    <string name="guide_doctor_where">Ajustes › Permisos › Segundo plano y batería</string>
+    <string name="guide_doctor_needs">Batería sin restricciones</string>
+    <string name="guide_doctor_need_1">Uso de batería en segundo plano sin restricciones activado.</string>
+    <string name="guide_doctor_opt_1">Segundo plano y batería: Sin restricciones deja que Android mantenga Broche conectado con la pantalla apagada, para que tu PC llegue al teléfono.</string>
+    <string name="guide_doctor_phone_1">Abre Ajustes › Permisos › Segundo plano y batería y permite el uso de batería sin restricciones.</string>
+    <string name="guide_doctor_phone_2">Sigue la guía de batería del fabricante si tu teléfono restringe las apps en segundo plano.</string>
+    <string name="guide_doctor_pc_1">Abre el Doctor de conexión en tu PC para inspeccionar la latencia del transporte, los puertos y el estado del enlace.</string>
+    <string name="guide_doctor_privacy">Los diagnósticos se ejecutan localmente entre tu teléfono y tu PC vinculado.</string>
+    <string name="guide_doctor_limits">Los ahorradores de batería de algunos fabricantes deben configurarse en Sin restricciones.</string>
+    <string name="pair_link_title">¿Vincular con %1$s?</string>
+    <string name="pair_link_body">Se abrió un enlace de vinculación. Vincula solo si acabas de escanear o abrir tú mismo el código de este PC. Un PC vinculado puede recibir las notificaciones y los mensajes de este teléfono.</string>
+    <string name="pair_link_confirm">Vincular</string>
+    <string name="pair_link_cancel">Cancelar</string>
+    <string name="pair_link_unknown_pc">este PC</string>
+    <string name="data_clear_failed">No se pudo borrar parte del historial. Reinténtalo.</string>
+    <string name="home_guide_title">Guía</string>
+    <string name="home_whats_new_guide">Novedad: Guía de funciones</string>
+    <string name="home_guide_card_body">Explora cada función de Broche, comprueba los permisos en vivo o toca Mostrar para ir directo a cualquier control.</string>
+    <string name="home_no_pc_paired">Aún no hay ningún PC vinculado</string>
+    <string name="home_no_pc_body">Abre Broche en tu PC con Linux para vincular con un código QR o por detección local, o vuelve a abrir la guía de configuración.</string>
+    <string name="home_background_clipboard_title">Portapapeles en segundo plano y control total</string>
+    <string name="home_background_clipboard_body">Sincroniza el portapapeles en segundo plano y activa el control táctil mediante la Depuración inalámbrica.</string>
+    <string name="home_section_screen">Pantalla, cámara y entrada</string>
+    <string name="home_section_transfer">Transferencia rápida y portapapeles</string>
+    <string name="settings_category_devices">Dispositivos</string>
+    <string name="settings_category_features">Funciones</string>
+    <string name="settings_mobile_data_body">Mantente conectado por LTE/5G o relé cuando estés fuera del Wi-Fi</string>
+    <string name="settings_background_clipboard_title">Acceso al portapapeles en segundo plano</string>
+    <string name="settings_guide_card_body">Explora cada función, comprueba los requisitos en vivo o ve directo a sus controles.</string>
+    <string name="settings_walkthrough_body">Vuelve a abrir la guía de configuración de permisos, vinculación y niveles de control.</string>
+    <string name="about_source_title">Código fuente</string>
+    <string name="about_source_body">El código, los problemas conocidos y las versiones de Broche en GitHub.</string>
+    <string name="queue_kind_clipboard">Portapapeles</string>
+    <string name="queue_kind_clipboard_image">Imagen del portapapeles</string>
+    <string name="queue_kind_files">Archivos</string>
+    <string name="queue_kind_folder">Carpeta</string>
+    <string name="queue_kind_link">Enlace</string>
+    <string name="queue_kind_document">Documento</string>
+    <string name="queue_kind_task_alert">Alerta de tarea</string>
+    <string name="queue_kind_camera_request">Solicitud de cámara</string>
+
+    <string name="settings_wireless_debugging_active">Activo mediante la Depuración inalámbrica</string>
+    <string name="settings_wireless_debugging_hint">Permite la Depuración inalámbrica para sincronizar el portapapeles en segundo plano, o usa Enviar portapapeles en la notificación</string>
+
+    <!-- Pause for banking apps -->
+    <string name="advanced_show">Modo avanzado (depuración inalámbrica)</string>
+    <string name="advanced_hide">Ocultar el modo avanzado</string>
+    <string name="pc_files_select">Seleccionar</string>
+    <plurals name="pc_files_selected">
+        <item quantity="one">%1$d seleccionado</item>
+        <item quantity="many">%1$d seleccionados</item>
+        <item quantity="other">%1$d seleccionados</item>
+    </plurals>
+    <string name="pc_files_download">Descargar</string>
+    <string name="pc_files_hint">Mantén pulsado un archivo para elegir varios.</string>
+    <string name="pc_files_saved_many">%1$d de %2$d archivos guardados en Descargas</string>
+    <string name="pc_files_show_hidden">Mostrar archivos ocultos</string>
+    <string name="settings_video">Vídeo</string>
+    <string name="theme_system_colors">Colores del sistema Android</string>
+    <string name="about_fork">Versión modificada independiente, basada en NectarLink 0.1.4 de Bee/thtbee. No es una versión oficial de NectarLink ni está respaldada por su autor. Interfaz Material 3; paletas Catppuccin y Tokyo Night.</string>
+    <string name="about_brand_plan">Se conservan los créditos originales y los avisos de las licencias libres.</string>
+    <string name="nav_activity">Actividad</string>
+    <string name="activity_intro">Transferencias, cola de envío, historial y portapapeles, en un solo lugar.</string>
+    <string name="activity_empty_title">Todavía no hay nada</string>
+    <string name="activity_empty_body">Aquí aparecerán los archivos que envíes o recibas, el texto copiado y los enlaces compartidos.</string>
+    <string name="settings_search_hint">Buscar ajustes</string>
+    <string name="settings_search_empty">Ningún ajuste coincide con «%1$s».</string>
+    <string name="settings_search_clear">Borrar búsqueda</string>
+    <string name="settings_back">Volver a Ajustes</string>
+    <string name="settings_cat_devices_summary">PC vinculados: %1$d · vinculación y conexión</string>
+    <string name="settings_cat_permissions_summary">%1$d de %2$d grupos permitidos · para qué sirve cada uno</string>
+    <string name="settings_cat_features_summary">Portapapeles, panel táctil y LocalSend</string>
+    <string name="settings_cat_appearance_summary">Tema, idioma y modo oscuro</string>
+    <string name="settings_cat_video_summary">Fluidez de la pantalla y la cámara</string>
+    <string name="settings_cat_data_summary">Historial, cachés y borrado de datos</string>
+    <string name="settings_cat_about_summary">Guía, recorrido, versión y licencias</string>
+    <string name="settings_permissions_intro">Todos los permisos son opcionales. Broche usa cada uno solo para las funciones que se indican debajo y solo envía lo que necesitan a tus PC vinculados. Activa solo lo que necesites.</string>
+    <string name="perm_desc_notifications">Muestra las notificaciones del teléfono en el PC para leerlas y responderlas desde allí.</string>
+    <string name="perm_desc_control">Permite que el PC toque y escriba en este teléfono mientras ves su pantalla.</string>
+    <string name="perm_desc_system">Permite que el PC cambie No molestar y otros ajustes rápidos del teléfono.</string>
+    <string name="perm_desc_background">Mantiene la conexión con la app cerrada, para que el PC pueda encontrar, hacer sonar o escribir al teléfono.</string>
+    <string name="perm_desc_calls">Contestar y hacer llamadas y leer o enviar SMS desde el PC, y ver quién llama.</string>
+    <string name="perm_desc_photos">Permite que el PC vea tus fotos y las carpetas que elijas.</string>
+    <string name="settings_system_title">No molestar y ajustes del sistema</string>
+    <string name="status_allowed">Permitido</string>
+    <string name="status_missing">Sin permiso</string>
+    <string name="activity_open_received">Abrir archivos recibidos (Descargas/Broche)</string>
+    <string name="pc_resources">PC: CPU %1$d%% · Memoria %2$d%%</string>
+    <string name="clip_share_copy_label">Copiar al portapapeles del PC</string>
+    <string name="share_send_title">Enviar a tu PC</string>
+    <string name="share_copy_title">Copiar al portapapeles del PC</string>
+    <string name="share_send_action">Enviar</string>
+    <string name="share_copy_action">Copiar</string>
+    <string name="share_pick_pc">¿A qué PC?</string>
+    <string name="share_to_pc">A %1$s</string>
+    <string name="share_pc_online">Conectado</string>
+    <string name="share_pc_offline">Sin conexión · se envía cuando se conecte</string>
+    <string name="share_copy_hint">Pégala en cualquier app del PC.</string>
+    <plurals name="share_files">
+        <item quantity="one">%1$d archivo</item>
+        <item quantity="many">%1$d archivos</item>
+        <item quantity="other">%1$d archivos</item>
+    </plurals>
+    <string name="share_confirm_body">Broche enviará este contenido a un PC vinculado. Continúa solo si querías compartirlo.</string>
+    <string name="share_unsupported_source">No se puede compartir desde este origen. Selecciona el archivo con Enviar archivos en Broche.</string>
+    <string name="profile_title">Qué puede hacer este PC en el teléfono</string>
+    <string name="profile_custom">Personalizado: algunos permisos se cambiaron uno a uno.</string>
+    <string name="profile_notifications_only">Solo notificaciones</string>
+    <string name="profile_notifications_only_body">El PC recibe notificaciones, mensajes, llamadas y contactos. Nada más.</string>
+    <string name="profile_basic">Básico</string>
+    <string name="profile_basic_body">Lo de cada día: archivos, portapapeles, fotos, música y la pantalla y la cámara de este teléfono.</string>
+    <string name="profile_multimedia">Multimedia</string>
+    <string name="profile_multimedia_body">Básico, más explorar el almacenamiento del teléfono y ver aquí la pantalla del PC.</string>
+    <string name="profile_full">Control total</string>
+    <string name="profile_full_body">Todo lo que el PC pueda pedir. Solo para tu propio PC.</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_change">Cambiar</string>
+    <string name="phone_name_title">Nombre de este teléfono</string>
+    <string name="phone_name_body">Cómo ven tus PCs este teléfono. Déjalo vacío para usar el nombre del propio teléfono.</string>
+    <string name="video_quality_hint">Calidad para las pantallas y la webcam. Es la misma en el PC: cámbiala en cualquiera de los dos. Se aplica a las transmisiones nuevas.</string>
+    <string name="video_quality_normal">Normal · 720p, 30 fps</string>
+    <string name="video_quality_high">Alta · 1080p, 60 fps (experimental)</string>
+    <string name="video_quality_high_hint">Alta es más fluida pero gasta más batería y red. Vuelve a Normal si la imagen se entrecorta.</string>
+    <string name="detailed_permissions">Permisos detallados</string>
+    <string name="state_expanded">Desplegado</string>
+    <string name="state_collapsed">Plegado</string>
+    <string name="toggle_notifications">Notificaciones</string>
+    <string name="toggle_messages">Mensajes</string>
+    <string name="toggle_calls">Llamadas</string>
+    <string name="toggle_contacts">Contactos</string>
+    <string name="toggle_clipboard">Portapapeles</string>
+    <string name="toggle_files">Enviar archivos</string>
+    <string name="toggle_media">Música y multimedia</string>
+    <string name="toggle_photos">Fotos</string>
+    <string name="toggle_toggles">Ajustes rápidos</string>
+    <string name="toggle_pc_actions">Acciones del PC (bloquear, suspender, volumen)</string>
+    <string name="toggle_mirroring">La pantalla de este teléfono</string>
+    <string name="toggle_webcam">Webcam</string>
+    <string name="toggle_storage">Explorar el almacenamiento del teléfono</string>
+    <string name="toggle_pc_mirror">La pantalla del PC en este teléfono</string>
+    <string name="toggle_remote_input">Control remoto (ratón y teclado)</string>
+    <string name="toggle_commands">Ejecutar órdenes de los atajos</string>
+    <string name="toggle_remote_files">Archivos fuera de la red de casa</string>
+    <string name="settings_cat_android_permissions">Permisos de Android</string>
+    <string name="calls_bluetooth_title">Audio de llamadas</string>
+    <string name="calls_bluetooth_help">Para escuchar y hablar desde el PC, haz tres cosas tú (Broche nunca cambia tus ajustes):\n1) Permite Teléfono, Registro de llamadas y Contactos en Permisos › Llamadas, contactos y mensajes, para que Broche muestre quién llama y conteste o cuelgue.\n2) Empareja este teléfono con el PC en los ajustes Bluetooth.\n3) En ese emparejamiento, deja activado Llamadas telefónicas. Puedes desactivar Audio multimedia para que la música siga en el teléfono.</string>
+    <string name="calls_bluetooth_open">Ajustes Bluetooth</string>
+</resources>

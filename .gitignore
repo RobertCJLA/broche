@@ -1,0 +1,102 @@
+# ---- Allow-list: only these paths are published. ----
+# Anything else (notes, screenshots, local files) stays out of the repository.
+# Ask the maintainer before adding a path, and run scripts/check-public.sh
+# before every commit.
+/*
+!/apps/
+!/crates/
+!/scripts/
+!/assets/
+!/LICENSES/
+!/.github/
+/.github/CODEOWNERS
+!/docs/
+/docs/*
+!/docs/protocol/
+!/docs/technical/
+!/docs/architecture/
+!/docs/branding/
+!/docs/design/
+!/docs/VERSIONING.md
+!/docs/screenshots/
+/docs/screenshots/*
+!/docs/screenshots/home-dark.png
+!/docs/screenshots/home-light.png
+!/docs/screenshots/messages.png
+!/docs/screenshots/notifications.png
+!/docs/screenshots/settings.png
+!/README.md
+!/CHANGELOG.md
+!/LICENSE
+!/TRADEMARKS.md
+!/SECURITY.md
+!/CONTRIBUTING.md
+!/CODE_OF_CONDUCT.md
+!/DCO.txt
+!/Cargo.toml
+!/Cargo.lock
+!/deny.toml
+!/rustfmt.toml
+!/rust-toolchain.toml
+!/.editorconfig
+!/.gitattributes
+!/.gitignore
+
+# ---- Secrets: never commit these ----
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+keystore.properties
+signing.properties
+.env
+.env.*
+!.env.example
+
+# ---- Rust ----
+/target/
+**/target/
+**/*.rs.bk
+
+# ---- Android / Gradle ----
+.gradle/
+**/build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+apps/android/**/jniLibs/
+
+# ---- IDEs and editors ----
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+
+# ---- OS clutter ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Logs and tool output ----
+*.log
+
+# Kotlin compiler session data
+.kotlin/
+
+# ---- Maintainer and AI agent notes: kept on the PC (also outside the allow-list) ----
+AGENTS.md
+CLAUDE.md
+.codex/
+/docs/superpowers/
+/docs/ANDROID_HANDOFF.md
+/docs/BRANDING_PLAN.md

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Home-screen widget, dark (Catppuccin Mocha). -->
+<resources>
+    <color name="widget_bg">#1E1E2E</color>
+    <color name="widget_on">#CDD6F4</color>
+    <color name="widget_on_variant">#BAC2DE</color>
+    <color name="widget_accent">#89B4FA</color>
+    <color name="widget_on_accent">#11111B</color>
+    <color name="widget_button">#313244</color>
+</resources>

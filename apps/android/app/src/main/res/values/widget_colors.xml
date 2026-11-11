@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Home-screen widget, light (Catppuccin Latte). Android 12+ uses the wallpaper colors (values-v31). -->
+<resources>
+    <color name="widget_bg">#EFF1F5</color>
+    <color name="widget_on">#4C4F69</color>
+    <color name="widget_on_variant">#5C5F77</color>
+    <color name="widget_accent">#1E66F5</color>
+    <color name="widget_on_accent">#FFFFFF</color>
+    <color name="widget_button">#DCE0E8</color>
+</resources>

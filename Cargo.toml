@@ -1,0 +1,80 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/broche-adb",
+    "crates/broche-protocol",
+    "crates/broche-core",
+    "crates/broche-ffi",
+    "apps/cli",
+    "apps/linux",
+]
+
+[workspace.package]
+version = "0.2.0"
+edition = "2024"
+rust-version = "1.97"
+authors = ["The NectarLink contributors", "RobertCJLA"]
+repository = "https://github.com/RobertCJLA/broche"
+
+# Each release's name, from a bee's life (0.1 Pollen, …); the release
+# workflow puts it in the release's title.
+[workspace.metadata.release]
+name = "Pollen"
+
+[workspace.dependencies]
+broche-adb = { path = "crates/broche-adb", version = "0.2.0" }
+broche-protocol = { path = "crates/broche-protocol", version = "0.2.0" }
+broche-core = { path = "crates/broche-core", version = "0.2.0" }
+
+anyhow = "1"
+ciborium = "0.2"
+clap = { version = "4.6", features = ["derive"] }
+data-encoding = "2.11"
+dirs = "7"
+hostname = "0.4"
+hmac = "0.13"
+iroh = "1.3"
+iroh-mdns-address-lookup = "0.6"
+material-colors = { version = "0.5", default-features = false, features = ["std", "quantize"] }
+n0-future = "0.3"
+qrcode = { version = "0.14", default-features = false }
+rand = "0.10"
+rusqlite = { version = "0.40", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_bytes = "0.11"
+blake3 = "1"
+bytes = "1"
+sha2 = "0.11"
+tempfile = "3"
+thiserror = "2"
+uniffi = "0.32"
+tokio-util = "0.7"
+tokio = { version = "1.53", features = ["rt-multi-thread", "macros", "io-util", "sync", "time", "fs"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+url = "2.5"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+missing_debug_implementations = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+
+# Debug builds: full debug info for our crates, line tables only for
+# dependencies (backtraces still name their lines). Keeps target/debug from
+# growing by gigabytes per rebuild.
+[profile.dev.package."*"]
+debug = "line-tables-only"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+
+# Android: release optimizations, but symbols are kept so UniFFI can read its
+# metadata from the library; the Android build strips them when packaging.
+[profile.android]
+inherits = "release"
+strip = "debuginfo"

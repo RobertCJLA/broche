@@ -1,0 +1,81 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Broche CI: the core, the Linux app and the Android app. It only builds and
+# tests; it publishes nothing and uses no secrets.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  CORE_CRATES: -p broche-protocol -p broche-core -p broche-ffi -p broche-cli
+
+jobs:
+  rust:
+    name: Core and Linux app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: No private data
+        run: bash scripts/check-public-test.sh && scripts/check-public.sh --all
+      - name: Rust toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - name: Formatting
+        run: cargo fmt --all --check
+      - name: Clippy, core and Linux app (no warnings)
+        run: cargo clippy --locked $CORE_CRATES -p broche-gui --all-targets -- -D warnings
+      - name: Unit tests
+        run: cargo test --locked $CORE_CRATES -p broche-gui --lib --bins
+      # The two-device tests open real Iroh connections; they need a network
+      # interface with an address (GitHub's runners have one).
+      - name: Two-device tests
+        run: cargo test --locked -p broche-core --tests
+      - name: Release build and tar.gz
+        run: APPIMAGE=0 scripts/package-linux.sh
+      - uses: actions/upload-artifact@v7
+        with:
+          name: broche-linux-x86_64
+          path: target/package/*.tar.gz
+          retention-days: 14
+
+  android:
+    name: Android app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Rust toolchain and Android targets
+        run: |
+          rustup show active-toolchain || rustup toolchain install
+          rustup target add aarch64-linux-android x86_64-linux-android
+      - uses: Swatinem/rust-cache@v2
+      - name: cargo-ndk
+        run: cargo install --locked cargo-ndk
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: android-actions/setup-android@v4
+        with:
+          # Command-line tools 23.0: older ones don't list platform 37.0.
+          cmdline-tools-version: "16111833"
+          packages: "platforms;android-37.0 ndk;30.0.16248370"
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Tests and debug APK
+        working-directory: apps/android
+        run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug
+      - uses: actions/upload-artifact@v7
+        with:
+          name: broche-android-debug
+          path: apps/android/app/build/outputs/apk/debug/*.apk
+          retention-days: 14

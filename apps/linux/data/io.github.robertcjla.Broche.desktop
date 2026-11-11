@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Broche
+GenericName=Phone link
+Comment=Your Android phone and your PC, working as one
+Comment[es]=Tu teléfono Android y tu PC, trabajando como uno
+Exec=broche %U
+Icon=io.github.robertcjla.Broche
+Terminal=false
+Categories=Network;
+Keywords=phone;android;sync;notifications;files;clipboard;mirror;
+StartupWMClass=io.github.robertcjla.Broche

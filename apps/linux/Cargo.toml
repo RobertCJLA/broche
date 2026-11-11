@@ -1,0 +1,37 @@
+[package]
+name = "broche-gui"
+description = "Broche graphical application for Linux using the shared core"
+license = "GPL-3.0-or-later"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[[bin]]
+name = "broche"
+path = "src/main.rs"
+
+[dependencies]
+eframe = "0.33"
+qrcode.workspace = true
+broche-core = { workspace = true, features = ["secret-service"] }
+tracing-subscriber.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+dirs.workspace = true
+hostname.workspace = true
+ashpd = { version = "0.13.13", default-features = false, features = ["tokio", "remote_desktop", "screencast", "file_chooser", "background", "settings"] }
+image = { version = "0.25.10", default-features = false, features = ["jpeg", "png"] }
+rustix = { version = "1", features = ["fs", "process", "std"] }
+
+raw-window-handle = "0.6"
+zbus = { version = "5.19", default-features = false, features = ["tokio"] }
+url = "2"
+# Already built for iroh; downloads album art from players that give a web address.
+reqwest = { version = "0.13", default-features = false, features = ["rustls-no-provider"] }
+rustls = { version = "0.23", default-features = false, features = ["ring"] }
+# Already built for winit; used directly to watch the clipboard (X11 / XWayland).
+futures-util = "0.3"
+x11rb = { version = "0.13", features = ["xfixes", "shape", "randr"] }

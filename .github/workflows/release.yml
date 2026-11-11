@@ -1,0 +1,128 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Builds the Linux tar.gz and the signed Android app for the tag it runs on,
+# and puts both on a draft GitHub release with their SHA-256 sums, for a
+# maintainer to review and publish.
+#
+# Run by hand for now (not on v* tags). The signed APK needs the
+# ANDROID_KEYSTORE* secrets.
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  version:
+    name: The tag matches the version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          version=$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)
+          if [ "v$version" != "${{ github.ref_name }}" ]; then
+            echo "::error::tag ${{ github.ref_name }} but Cargo.toml says $version"
+            exit 1
+          fi
+
+  linux:
+    name: Linux tar.gz (x86_64)
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install the pinned Rust toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      - name: Build the package
+        run: APPIMAGE=0 scripts/package-linux.sh
+      - uses: actions/upload-artifact@v7
+        with:
+          name: linux
+          path: target/package/*.tar.gz
+
+  android:
+    name: Android app (signed)
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install the pinned Rust toolchain and the Android targets
+        run: |
+          rustup show active-toolchain || rustup toolchain install
+          rustup target add aarch64-linux-android armv7-linux-androideabi
+      - name: Install cargo-ndk
+        run: cargo install --locked cargo-ndk
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: android-actions/setup-android@v4
+        with:
+          cmdline-tools-version: "16111833"
+          packages: "platforms;android-37.0 ndk;30.0.16248370 build-tools;37.0.0"
+      - uses: gradle/actions/setup-gradle@v6
+      - name: The signing key
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+        run: |
+          if [ -z "$KEYSTORE" ]; then echo "::error::the ANDROID_KEYSTORE secret isn't set"; exit 1; fi
+          echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/release.jks"
+      - name: Build
+        working-directory: apps/android
+        env:
+          BROCHE_KEYSTORE: ${{ runner.temp }}/release.jks
+          BROCHE_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        # Phones: 64-bit ARM, and 32-bit ARM for older ones.
+        run: ./gradlew --no-daemon assembleRelease -Pbroche.abis=arm64-v8a,armeabi-v7a
+      - name: Check the signature, and name the app
+        run: |
+          apk=apps/android/app/build/outputs/apk/release/app-release.apk
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --print-certs "$apk"
+          mkdir -p out
+          cp "$apk" "out/Broche-${GITHUB_REF_NAME#v}-android.apk"
+      - name: Forget the key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: android
+          path: out/*.apk
+
+  publish:
+    name: Draft the release
+    needs: [linux, android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          path: files
+          merge-multiple: true
+      - uses: actions/checkout@v7
+        with:
+          path: source
+          sparse-checkout: |
+            Cargo.toml
+            CHANGELOG.md
+            .github/scripts
+      - name: Draft it
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The release's name, if Cargo.toml gives one ([workspace.metadata.release]).
+          name=$(awk '/^\[workspace.metadata.release\]/{f=1;next} /^\[/{f=0} f && /^name = /{print $3}' source/Cargo.toml | tr -d '"')
+          title="Broche ${GITHUB_REF_NAME#v}${name:+ $name}"
+          cd files
+          sha256sum *.tar.gz *.apk > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          # The notes: this version's section of CHANGELOG.md ("## <version> ..."),
+          # with its wrapped lines joined, or GitHub's generated notes when
+          # there isn't one.
+          awk -v v="${GITHUB_REF_NAME#v}" '$1=="##" && $2==v {f=1; next} f && /^## / {exit} f' \
+            ../source/CHANGELOG.md | awk -f ../source/.github/scripts/unwrap-notes.awk > notes.md || true
+          if [ -s notes.md ]; then notes=(--notes-file notes.md); else notes=(--generate-notes); fi
+          gh release create "${{ github.ref_name }}" *.tar.gz *.apk SHA256SUMS.txt \
+            --repo "${{ github.repository }}" --draft "${notes[@]}" --title "$title"

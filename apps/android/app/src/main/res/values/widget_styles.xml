@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<resources>
+    <!-- A widget shortcut: icon above a label of up to two lines. -->
+    <style name="WidgetAction">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:background">@drawable/bg_widget_button</item>
+        <item name="android:drawablePadding">2dp</item>
+        <item name="android:drawableTint">@color/widget_on</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:gravity">center</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">6dp</item>
+        <item name="android:paddingStart">2dp</item>
+        <item name="android:paddingEnd">2dp</item>
+        <item name="android:textColor">@color/widget_on</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+</resources>

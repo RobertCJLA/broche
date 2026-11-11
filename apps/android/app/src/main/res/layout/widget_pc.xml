@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Home-screen widget: the PC and how it's connected, what it plays, and four shortcuts. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_widget_card"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <!-- PC name, how it's connected, and Wake when it's off -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/widget_pc_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/widget_pc_no_pc"
+                android:textColor="@color/widget_on"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_pc_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/widget_pc_tap_to_pair"
+                android:textColor="@color/widget_on_variant"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/widget_btn_wake"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_widget_play"
+            android:gravity="center"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="@string/widget_pc_wake"
+            android:textColor="@color/widget_on_accent"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- What the PC plays: artwork, title and artist, previous / play-pause / next -->
+    <LinearLayout
+        android:id="@+id/widget_media_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/widget_media_art"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_widget_art"
+            android:clipToOutline="true"
+            tools:targetApi="s"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            android:src="@drawable/widget_art_placeholder" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/widget_media_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="@color/widget_on"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_media_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="@color/widget_on_variant"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/widget_btn_media_previous"
+            android:layout_width="40dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/media_previous"
+            android:padding="8dp"
+            android:src="@drawable/ic_skip_previous"
+            android:tint="@color/widget_on" />
+
+        <ImageView
+            android:id="@+id/widget_btn_media_play"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_widget_play"
+            android:contentDescription="@string/media_play"
+            android:padding="12dp"
+            android:src="@drawable/ic_play"
+            android:tint="@color/widget_on_accent" />
+
+        <ImageView
+            android:id="@+id/widget_btn_media_next"
+            android:layout_width="40dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/media_next"
+            android:padding="8dp"
+            android:src="@drawable/ic_skip_next"
+            android:tint="@color/widget_on" />
+    </LinearLayout>
+
+    <!-- Send files, Copy to PC, PC shortcuts, Control PC -->
+    <LinearLayout
+        android:id="@+id/widget_actions_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/widget_btn_send_files"
+            style="@style/WidgetAction"
+            android:drawableTop="@drawable/ic_upload"
+            android:text="@string/action_send_files" />
+
+        <TextView
+            android:id="@+id/widget_btn_send_clip"
+            style="@style/WidgetAction"
+            android:layout_marginStart="6dp"
+            android:drawableTop="@drawable/ic_clipboard"
+            android:text="@string/action_send_clipboard" />
+
+        <TextView
+            android:id="@+id/widget_btn_deck"
+            style="@style/WidgetAction"
+            android:layout_marginStart="6dp"
+            android:drawableTop="@drawable/ic_apps"
+            android:text="@string/action_deck_pc" />
+
+        <TextView
+            android:id="@+id/widget_btn_remote"
+            style="@style/WidgetAction"
+            android:layout_marginStart="6dp"
+            android:drawableTop="@drawable/ic_mouse"
+            android:text="@string/action_remote_pc" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,66 @@
+# Flatpak manifest for Broche for Linux.
+#   flatpak-builder --user --install --force-clean build-dir \
+#     apps/linux/packaging/flatpak/io.github.robertcjla.Broche.yml
+# The runtime brings every helper Broche calls: ffmpeg/ffplay (phone screen and camera, ring),
+# gst-launch-1.0 with pipewiresrc and the VA/openh264 encoders (this PC's screen to the phone),
+# pw-play/pw-record/parec (sound) and pactl (PC volume; wpctl is not in the runtime).
+# cargo-sources.json comes from scripts/flatpak-cargo-sources.py (crates.io, checked by sha256).
+app-id: io.github.robertcjla.Broche
+runtime: org.freedesktop.Platform
+runtime-version: '26.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+command: broche
+finish-args:
+  - --share=network            # talks to the phone over the LAN (QUIC/UDP, mDNS)
+  - --share=ipc
+  - --socket=x11               # Broche always opens through XWayland (tray raising, clipboard)
+  - --socket=wayland           # only the fallback when no X server is reachable
+  - --device=dri               # GPU for the window
+  - --socket=pulseaudio        # pactl (PC volume), parec
+  - --filesystem=xdg-run/pipewire-0   # pw-play (phone's sound), pw-record (phone as speaker)
+  - --filesystem=~/Broche:create      # the folder phones may browse, and Recibidos
+  - --talk-name=org.pipewire.Telephony
+  - --system-talk-name=org.bluez
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.kde.StatusNotifierWatcher
+  # The tray item's bus name is under the app id in a Flatpak (see tray.rs): no --own-name.
+  - --talk-name=org.mpris.MediaPlayer2.*
+  - --talk-name=org.freedesktop.secrets   # the device key in the keyring (oo7)
+  # Screen readers: egui's AccessKit only turns on after reading org.a11y.Status.IsEnabled
+  # through org.a11y.Bus, which the sandbox hides otherwise (Orca saw nothing).
+  - --talk-name=org.a11y.Bus
+  # PC volume (PipeWire lets a Flatpak only read device volume), lock and suspend run on the
+  # host through `flatpak-spawn --host` (platform.rs `host`): wpctl/pactl, loginctl, systemctl.
+  - --talk-name=org.freedesktop.Flatpak
+  # Autostart uses the Background portal; mouse/keyboard control and screen sharing use the
+  # RemoteDesktop and ScreenCast portals. The desktop asks the user, no permission here.
+  # The PC battery comes from /sys/class/power_supply, which the sandbox can read.
+modules:
+  - name: broche
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/rust-stable/bin
+      env:
+        CARGO_HOME: /run/build/broche/cargo
+        CARGO_NET_OFFLINE: 'true'
+    build-commands:
+      - cargo build --offline --release -p broche-gui -p broche-cli
+      - install -Dm755 target/release/broche /app/bin/broche
+      - install -Dm755 target/release/broche-cli /app/bin/broche-cli
+      - install -Dm644 apps/linux/data/io.github.robertcjla.Broche.desktop /app/share/applications/io.github.robertcjla.Broche.desktop
+      - install -Dm644 apps/linux/data/io.github.robertcjla.Broche.metainfo.xml /app/share/metainfo/io.github.robertcjla.Broche.metainfo.xml
+      - install -Dm644 apps/linux/data/icon-256.png /app/share/icons/hicolor/256x256/apps/io.github.robertcjla.Broche.png
+      - install -Dm644 apps/linux/data/icon-512.png /app/share/icons/hicolor/512x512/apps/io.github.robertcjla.Broche.png
+      - install -Dm644 apps/linux/data/io.github.robertcjla.Broche.svg /app/share/icons/hicolor/scalable/apps/io.github.robertcjla.Broche.svg
+    sources:
+      - type: dir
+        path: ../../../..
+        skip:
+          - target
+          - .git
+          - android
+          - build-dir
+          - .flatpak-builder
+      - cargo-sources.json
