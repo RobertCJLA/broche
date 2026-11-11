@@ -27,7 +27,7 @@ image = { version = "0.25.10", default-features = false, features = ["jpeg", "pn
 rustix = { version = "1", features = ["fs", "process", "std"] }
 
 raw-window-handle = "0.6"
-zbus = { version = "5.19", default-features = false, features = ["tokio"] }
+zbus = { version = "6.2", default-features = false, features = ["tokio"] }
 url = "2"
 # Already built for iroh; downloads album art from players that give a web address.
 reqwest = { version = "0.13", default-features = false, features = ["rustls-no-provider"] }
