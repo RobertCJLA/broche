@@ -596,6 +596,7 @@
     <string name="pc_files_downloading">Descargando %1$s…</string>
     <string name="pc_files_saved">%1$s guardado en Descargas</string>
     <string name="pc_files_failed">No se pudo descargar %1$s</string>
+    <string name="pc_files_folder_too_large">Esta carpeta contiene demasiados elementos para mostrarlos.</string>
 
     <!-- Live streaming banners, remote input setup, collapsible permissions & clipboard privacy -->
     <string name="mirror_banner_subtitle_control_on">Toca, desliza y escribe desde tu PC</string>

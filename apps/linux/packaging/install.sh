@@ -22,6 +22,7 @@ remove() { # $1: app ID, then its binaries
   for b in "$@"; do rm -f "$PREFIX/bin/$b"; done
   rm -f "$PREFIX/share/applications/$id.desktop" \
         "$PREFIX/share/metainfo/$id.metainfo.xml" \
+        "$PREFIX/share/licenses/$id/egui-default-fonts.txt" \
         "$PREFIX/share/icons/hicolor/256x256/apps/$id.png" \
         "$PREFIX/share/icons/hicolor/512x512/apps/$id.png" \
         "$PREFIX/share/icons/hicolor/scalable/apps/$id.svg"
@@ -46,6 +47,7 @@ else
   install -Dm644 "$DATA/icon-256.png" "$PREFIX/share/icons/hicolor/256x256/apps/$ID.png"
   install -Dm644 "$DATA/icon-512.png" "$PREFIX/share/icons/hicolor/512x512/apps/$ID.png"
   install -Dm644 "$DATA/$ID.svg" "$PREFIX/share/icons/hicolor/scalable/apps/$ID.svg"
+  install -Dm644 "$HERE/../../../LICENSES/egui-default-fonts.txt" "$PREFIX/share/licenses/$ID/egui-default-fonts.txt"
 fi
 # Full path to the program: GNOME Shell's PATH often lacks ~/.local/bin, and then it ignores
 # the menu entry, so the window and its notifications show a bare ID and a generic icon.

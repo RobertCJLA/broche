@@ -139,8 +139,9 @@ Compared with NectarLink 0.1.4. The [CHANGELOG](CHANGELOG.md) has every change i
 
 Video runs at 30 fps by default (60 fps in high quality). Each device's key is stored encrypted:
 in the desktop keyring on Linux and in the Android Keystore on the phone. Devices find each other
-on the local network or over USB; **Connect over mobile data** (off by default) also lets them
-meet through relay servers, which only pass on encrypted traffic.
+on the local network or over USB. To connect through encrypted relays, enable
+**Connect over mobile data** on Android and use `broche-cli --away` on Linux.
+The Linux desktop app does not currently offer relay mode.
 
 ## What it doesn't do
 

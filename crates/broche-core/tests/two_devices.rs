@@ -3063,6 +3063,13 @@ async fn phone_storage_lists_reads_ranges_writes_resumes_mutates_and_enforces_se
     assert_eq!(doc_entries[0].size, 16);
     assert!(!doc_entries[0].is_dir);
 
+    let large = tempfile::tempdir_in(storage_root.path()).unwrap();
+    for index in 0..4096 {
+        std::fs::File::create(large.path().join(format!("{index:04}-{}", "x".repeat(250)))).unwrap();
+    }
+    let large_name = large.path().file_name().unwrap().to_str().unwrap();
+    assert!(matches!(pc.node.storage_list(phone_id, large_name).await, Err(Error::TooLarge)));
+
     // Full read and ranged read (`offset` + `length`).
     let (meta_full, bytes_full) =
         with_timeout("read full", pc.node.storage_read(phone_id, "Documents/readme.txt", 0, None))
@@ -4236,6 +4243,12 @@ async fn localsend_is_off_by_default_and_persists_setting() {
     assert!(!dev.node.localsend_enabled());
     assert!(!dev.node.localsend_receiving());
     assert!(dev.node.localsend_peers().is_empty());
+
+    let blocked = dev.dir.path().join("localsend.enc.tmp");
+    std::fs::create_dir(&blocked).unwrap();
+    assert!(dev.node.set_localsend_enabled(true).is_err());
+    assert!(!dev.node.localsend_enabled());
+    std::fs::remove_dir(blocked).unwrap();
 
     dev.node.set_localsend_enabled(true).unwrap();
     wait_for(&mut dev, "localsend enabled event", |e| match e {

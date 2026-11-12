@@ -62,7 +62,7 @@ StorageEntry = {
 
 Lists the immediate children of `path` (`""` for the root). Symlinks pointing
 outside the shared root and unreadable/private entries are omitted. If the list
-would exceed `MAX_FRAME_LEN`, entries are trimmed to fit.
+would exceed `MAX_FRAME_LEN`, the receiver returns `FRAME_TOO_LARGE`.
 
 Errors: `NOT_FOUND` if `path` does not exist or is not a directory; `DENIED` if
 `storage` is off or permission is not granted; `BAD_MESSAGE` if `path` is malformed.

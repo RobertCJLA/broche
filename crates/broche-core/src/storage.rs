@@ -264,15 +264,13 @@ pub(crate) async fn handle(shared: &Arc<Shared>, session: &Arc<Session>, env: &E
                             .then_with(|| a.name.to_lowercase().cmp(&b.name.to_lowercase()))
                             .then_with(|| a.name.cmp(&b.name))
                     });
-                    // Ensure the frame fits within MAX_FRAME_LEN.
-                    let reply = loop {
-                        let body = StorageEntries { entries: entries.clone() };
-                        let candidate = Envelope::new(types::STORAGE_ENTRIES, &body)?.reply_to(env.id);
-                        if candidate.to_cbor().len() <= MAX_FRAME_LEN || entries.is_empty() {
-                            break candidate;
-                        }
-                        let new_len = (entries.len() * 3 / 4).max(entries.len().saturating_sub(1));
-                        entries.truncate(new_len);
+                    let body = StorageEntries { entries };
+                    let candidate = Envelope::new(types::STORAGE_ENTRIES, &body)?.reply_to(env.id);
+                    let reply = if candidate.to_cbor().len() <= MAX_FRAME_LEN {
+                        candidate
+                    } else {
+                        Envelope::error(ErrorCode::FrameTooLarge, "directory listing is too large")
+                            .reply_to(env.id)
                     };
                     session.send(reply).await?;
                 }
@@ -687,7 +685,12 @@ pub(crate) async fn list(
     }
     let req = Envelope::new(types::STORAGE_LIST, &StorageList { path })?;
     let reply = session.request(req, REQUEST_TIMEOUT).await?;
-    let body: StorageEntries = reply.expect_body(types::STORAGE_ENTRIES)?;
+    let body: StorageEntries = match reply.expect_body(types::STORAGE_ENTRIES) {
+        Err(broche_protocol::ProtocolError::Remote { code: ErrorCode::FrameTooLarge, .. }) => {
+            return Err(Error::TooLarge);
+        }
+        result => result?,
+    };
     Ok(body.entries.into_iter().filter_map(StorageEntry::sanitized).collect())
 }
 

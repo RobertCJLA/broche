@@ -35,6 +35,8 @@ confidence-threshold = 0.9
 exceptions = [
     { crate = "broche-cli", allow = ["GPL-3.0-or-later"] },
     { crate = "broche-gui", allow = ["GPL-3.0-or-later"] },
+    # The Linux packages include the upstream font notices.
+    { crate = "epaint_default_fonts", allow = ["OFL-1.1", "Ubuntu-font-1.0"] },
 ]
 
 [bans]

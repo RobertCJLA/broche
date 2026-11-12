@@ -100,9 +100,23 @@ abstract class CargoNdkBuild : DefaultTask() {
 
     @TaskAction
     fun build() {
+        val root = workspace.get().asFile
+        val home = System.getProperty("user.home")
+        val cargoHome = System.getenv("CARGO_HOME") ?: "$home/.cargo"
+        val rustupHome = System.getenv("RUSTUP_HOME") ?: "$home/.rustup"
+        val rustFlags = System.getenv("CARGO_ENCODED_RUSTFLAGS")?.split('\u001f')
+            ?: System.getenv("RUSTFLAGS").orEmpty().split(Regex("\\s+"))
+        val pathFlags = listOf(
+            "--remap-path-prefix=$home=/build-home",
+            "--remap-path-prefix=$cargoHome=/cargo",
+            "--remap-path-prefix=$rustupHome=/rustup",
+            "--remap-path-prefix=${root.absolutePath}=/broche",
+        )
         exec.exec {
-            workingDir = workspace.get().asFile
+            workingDir = root
             environment("ANDROID_NDK_HOME", ndk.get().asFile.absolutePath)
+            // Panic locations can contain absolute paths even after stripping symbols.
+            environment("CARGO_ENCODED_RUSTFLAGS", (rustFlags + pathFlags).filter(String::isNotEmpty).joinToString("\u001f"))
             commandLine(
                 buildList {
                     addAll(listOf("cargo", "ndk", "--platform", "26", "-o", outputDir.get().asFile.path))

@@ -250,6 +250,7 @@ pub(crate) struct LocalSendState {
     protector: Arc<dyn KeyProtector>,
     configured_port: u16,
     enabled: AtomicBool,
+    settings_lock: Mutex<()>,
     receiving: AtomicBool,
     bound_port: Mutex<u16>,
     identity: LocalSendIdentity,
@@ -302,6 +303,7 @@ impl LocalSendState {
             protector,
             configured_port: if configured_port == 0 { LOCALSEND_DEFAULT_PORT } else { configured_port },
             enabled: AtomicBool::new(stored.enabled),
+            settings_lock: Mutex::new(()),
             receiving: AtomicBool::new(false),
             bound_port: Mutex::new(if configured_port == 0 {
                 LOCALSEND_DEFAULT_PORT
@@ -331,13 +333,14 @@ impl LocalSendState {
     }
 
     pub fn set_enabled(&self, shared: &Arc<Shared>, enabled: bool) -> Result<()> {
-        let prev = self.enabled.swap(enabled, Ordering::SeqCst);
+        let _guard = self.settings_lock.lock().unwrap_or_else(|e| e.into_inner());
         let stored = StoredLocalSendState {
             enabled,
             cert_der_hex: data_encoding::HEXLOWER.encode(&self.identity.cert_der),
             key_pkcs8_hex: data_encoding::HEXLOWER.encode(&self.identity.key_pkcs8),
         };
         save_stored_state(&self.data_dir, &*self.protector, &stored)?;
+        let prev = self.enabled.swap(enabled, Ordering::SeqCst);
 
         if enabled && !prev {
             self.start(shared);
@@ -1577,7 +1580,10 @@ async fn read_chunked_vec<S: AsyncRead + Unpin>(
     let mut buf = prefetched.to_vec();
     let mut out = Vec::new();
     loop {
-        while find_crlf(&buf).is_none() {
+        let line_end = loop {
+            if let Some(end) = chunk_header_end(&buf)? {
+                break end;
+            }
             let mut tmp = [0u8; 4096];
             let n = tokio::time::timeout(IO_TIMEOUT, stream.read(&mut tmp))
                 .await
@@ -1586,9 +1592,6 @@ async fn read_chunked_vec<S: AsyncRead + Unpin>(
                 return Ok(out);
             }
             buf.extend_from_slice(&tmp[..n]);
-        }
-        let Some(line_end) = find_crlf(&buf) else {
-            break;
         };
         let size_line = String::from_utf8_lossy(&buf[..line_end]);
         let hex_part = size_line.split(';').next().unwrap_or("").trim();
@@ -1634,7 +1637,12 @@ where
     if head.chunked {
         let mut buf = head.prefetched_body.clone();
         loop {
-            while find_crlf(&buf).is_none() {
+            let line_end = loop {
+                if let Some(end) = chunk_header_end(&buf)
+                    .map_err(|e| TransferState::Failed(TransferFailure::Other(e.to_string())))?
+                {
+                    break end;
+                }
                 let mut tmp = [0u8; 8192];
                 let n = tokio::select! {
                     _ = cancel.cancelled() => return Err(TransferState::Cancelled),
@@ -1649,9 +1657,6 @@ where
                     return Ok(());
                 }
                 buf.extend_from_slice(&tmp[..n]);
-            }
-            let Some(line_end) = find_crlf(&buf) else {
-                return Ok(());
             };
             let size_line = String::from_utf8_lossy(&buf[..line_end]).into_owned();
             let hex_part = size_line.split(';').next().unwrap_or("").trim();
@@ -1795,6 +1800,14 @@ async fn read_http_response<S: AsyncRead + Unpin>(stream: &mut S) -> std::io::Re
 
 fn find_header_end(buf: &[u8]) -> Option<usize> {
     buf.windows(4).position(|w| w == b"\r\n\r\n")
+}
+
+fn chunk_header_end(buf: &[u8]) -> std::io::Result<Option<usize>> {
+    let end = find_crlf(buf);
+    if end.unwrap_or(buf.len().saturating_sub(1)) > MAX_HEADER_BYTES {
+        return Err(std::io::Error::new(ErrorKind::InvalidData, "HTTP chunk header too large"));
+    }
+    Ok(end)
 }
 
 fn find_crlf(buf: &[u8]) -> Option<usize> {
@@ -2103,6 +2116,31 @@ mod tests {
         let state2 =
             LocalSendState::open(dir.path(), Arc::new(PlainKeyProtector), LOCALSEND_DEFAULT_PORT).unwrap();
         assert_eq!(state2.identity.fingerprint, fp1);
+    }
+
+    #[tokio::test]
+    async fn chunk_header_limit_applies_to_json_and_uploads() {
+        let mut body = b"1;".to_vec();
+        body.resize(MAX_HEADER_BYTES + 1, b'a');
+        body.extend_from_slice(b"\r\nx\r\n0\r\n\r\n");
+        let err = read_chunked_vec(&mut body.as_slice(), &[], 1).await.unwrap_err();
+        assert_eq!(err.kind(), ErrorKind::InvalidData);
+
+        let head = HttpHead {
+            method: "POST".into(),
+            target: "/".into(),
+            content_length: None,
+            chunked: true,
+            prefetched_body: body,
+        };
+        let mut out = tokio::fs::File::from_std(tempfile::tempfile().unwrap());
+        let mut empty: &[u8] = &[];
+        assert!(
+            stream_body_to_file(&mut empty, &head, &mut out, 1, &CancellationToken::new(), |_| {})
+                .await
+                .is_err()
+        );
+        assert_eq!(out.metadata().await.unwrap().len(), 0);
     }
 
     #[tokio::test]

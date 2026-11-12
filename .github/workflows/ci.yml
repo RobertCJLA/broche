@@ -21,6 +21,16 @@ env:
   CORE_CRATES: -p broche-protocol -p broche-core -p broche-ffi -p broche-cli
 
 jobs:
+  dependencies:
+    name: Rust dependency policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          rust-version: stable
+          arguments: --locked --all-features
+
   rust:
     name: Core and Linux app
     runs-on: ubuntu-latest
