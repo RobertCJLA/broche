@@ -54,6 +54,7 @@ modules:
       - install -Dm644 apps/linux/data/icon-256.png /app/share/icons/hicolor/256x256/apps/io.github.robertcjla.Broche.png
       - install -Dm644 apps/linux/data/icon-512.png /app/share/icons/hicolor/512x512/apps/io.github.robertcjla.Broche.png
       - install -Dm644 apps/linux/data/io.github.robertcjla.Broche.svg /app/share/icons/hicolor/scalable/apps/io.github.robertcjla.Broche.svg
+      - install -Dm644 LICENSES/egui-default-fonts.txt /app/share/licenses/io.github.robertcjla.Broche/egui-default-fonts.txt
     sources:
       - type: dir
         path: ../../../..

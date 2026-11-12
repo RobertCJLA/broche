@@ -13,6 +13,7 @@ Broche starts from NectarLink 0.1.4; NectarLink's own history is in
 ## 0.2.1 (2026-11-11)
 
 - Android builds no longer embed the build machine's Rust source paths.
+- Update the bundled SQLite and Rust system libraries to address security advisories.
 - LocalSend rejects oversized chunk headers and keeps its previous setting if saving a change fails.
 - The file browser reports when a folder is too large to list instead of hiding entries.
 
