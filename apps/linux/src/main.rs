@@ -2613,6 +2613,8 @@ impl App {
                 if let Some(err) = self.storage_error.clone() {
                     let (icon, why) = if err.contains("offline") {
                         ("📵", t("The phone is not connected. Check that both devices are on the same network."))
+                    } else if err == broche_core::Error::TooLarge.to_string() {
+                        ("📁", t("This folder contains too many entries to list."))
                     } else {
                         ("🔒", format!("{}\n\n{}", capitalized(&i18n::core_errors(&err)), t("Turn on \"Browse files between these devices\" in Settings › Device and allow it in the phone app.")))
                     };

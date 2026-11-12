@@ -10,7 +10,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 rust-version = "1.97"
 authors = ["The NectarLink contributors", "RobertCJLA"]
@@ -22,9 +22,9 @@ repository = "https://github.com/RobertCJLA/broche"
 name = "Pollen"
 
 [workspace.dependencies]
-broche-adb = { path = "crates/broche-adb", version = "0.2.0" }
-broche-protocol = { path = "crates/broche-protocol", version = "0.2.0" }
-broche-core = { path = "crates/broche-core", version = "0.2.0" }
+broche-adb = { path = "crates/broche-adb", version = "0.2.1" }
+broche-protocol = { path = "crates/broche-protocol", version = "0.2.1" }
+broche-core = { path = "crates/broche-core", version = "0.2.1" }
 
 anyhow = "1"
 ciborium = "0.2"

@@ -767,7 +767,7 @@ dependencies = [
 
 [[package]]
 name = "broche-adb"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "thiserror 2.0.21",
  "tokio",
@@ -777,7 +777,7 @@ dependencies = [
 
 [[package]]
 name = "broche-cli"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "broche-core",
@@ -795,7 +795,7 @@ dependencies = [
 
 [[package]]
 name = "broche-core"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "blake3",
  "broche-adb",
@@ -828,7 +828,7 @@ dependencies = [
 
 [[package]]
 name = "broche-ffi"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "broche-core",
  "paranoid-android",
@@ -841,7 +841,7 @@ dependencies = [
 
 [[package]]
 name = "broche-gui"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "ashpd",
  "broche-core",
@@ -865,7 +865,7 @@ dependencies = [
 
 [[package]]
 name = "broche-protocol"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "ciborium",
  "data-encoding",

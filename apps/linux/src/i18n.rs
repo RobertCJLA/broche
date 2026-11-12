@@ -551,6 +551,9 @@ fn es(s: &str) -> Option<&'static str> {
         }
         "Appearance" => "Apariencia",
         "Can't open this folder" => "No se puede abrir esta carpeta",
+        "This folder contains too many entries to list." => {
+            "Esta carpeta contiene demasiados elementos para mostrarlos."
+        }
         "Choose files to send" => "Elegir archivos para enviar",
         "Choose files to upload to the phone" => "Elegir archivos para subir al teléfono",
         "Choose what this phone may do with this PC. You can change it at any time." => {

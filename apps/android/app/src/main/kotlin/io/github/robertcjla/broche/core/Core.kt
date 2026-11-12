@@ -1988,8 +1988,12 @@ class Core(context: Context, private val scope: CoroutineScope) : EventListener 
             var errorMessage: String? = if (node == null) context.getString(R.string.error_not_connected) else null
             val entries = runCatching { node?.listRemoteStorage(deviceId, path).orEmpty() }
                 .onFailure { error ->
-                    errorMessage = if (error is BrocheException) describe(error) else context.getString(R.string.error_generic)
-                    _messages.tryEmit(errorMessage!!)
+                    errorMessage = when (error) {
+                        is BrocheException.TooLarge -> context.getString(R.string.pc_files_folder_too_large)
+                        is BrocheException -> describe(error)
+                        else -> context.getString(R.string.error_generic)
+                    }
+                    _messages.tryEmit(errorMessage)
                 }
                 .getOrDefault(emptyList())
             withContext(Dispatchers.Main) {

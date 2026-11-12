@@ -60,7 +60,7 @@ modules:
         skip:
           - target
           - .git
-          - android
+          - apps/android
           - build-dir
           - .flatpak-builder
       - cargo-sources.json
