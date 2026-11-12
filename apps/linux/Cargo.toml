@@ -34,4 +34,4 @@ reqwest = { version = "0.13", default-features = false, features = ["rustls-no-p
 rustls = { version = "0.23", default-features = false, features = ["ring"] }
 # Already built for winit; used directly to watch the clipboard (X11 / XWayland).
 futures-util = "0.3"
-x11rb = { version = "0.13", features = ["xfixes", "shape", "randr"] }
+x11rb = { version = "0.14", features = ["xfixes", "shape", "randr"] }
